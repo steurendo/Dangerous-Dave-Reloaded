@@ -5,7 +5,7 @@ The goal was to avoid the use of a game engine, in order to increase the challen
 
 The levels are loaded from the file "gamedata.dat" has to be created by the DDR - Level Editor program (https://github.com/steurendo/DDR-LevelEditor).
 
-<p align="center"><img src="assets/main.png" width="50%"></p>
+<p align="center"><img src="assets/main.png" width="45%"></p>
 
 Commands:
 - Move: arrows
