@@ -1,3 +1,7 @@
+package entities;
+
+import utils.PointD;
+
 public class Shoot {
     private final static double SPEED = 5;
 

@@ -1,3 +1,7 @@
+package entities;
+
+import utils.PointD;
+
 import java.util.*;
 
 public class MovingEntity extends Entity {

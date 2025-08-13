@@ -1,6 +1,11 @@
+package ui;
+
+import game.Model;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import scenarios.*;
+import utils.Textures;
 
 import java.nio.*;
 

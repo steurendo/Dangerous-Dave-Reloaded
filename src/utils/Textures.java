@@ -1,3 +1,5 @@
+package utils;
+
 import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.image.*;

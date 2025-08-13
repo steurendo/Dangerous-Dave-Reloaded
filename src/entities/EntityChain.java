@@ -1,3 +1,5 @@
+package entities;
+
 public class EntityChain {
     private Entity entity;
     private EntityChain next;

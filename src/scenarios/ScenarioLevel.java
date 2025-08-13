@@ -1,3 +1,15 @@
+package scenarios;
+
+import entities.Entity;
+import entities.EntityChain;
+import entities.MovingEntity;
+import entities.Player;
+import game.Level;
+import game.Model;
+import ui.Keyboard;
+import utils.PointD;
+import utils.Textures;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -393,7 +405,7 @@ public class ScenarioLevel extends Scenario {
                             player.setSpeedX(Player.JUMP_SPEED_X * directionX);
                         else
                             player.setSpeedX(Player.SPEED_SLOW * directionX);
-                        //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? Player.SPEED_FAST : Player.SPEED_SLOW) * directionX);
+                        //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
                     }
                 }
                 update();

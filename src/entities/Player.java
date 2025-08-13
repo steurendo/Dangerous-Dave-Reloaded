@@ -1,3 +1,7 @@
+package entities;
+
+import utils.PointD;
+
 import java.awt.*;
 
 public class Player {

@@ -1,3 +1,9 @@
+package scenarios;
+
+import game.Model;
+import ui.Keyboard;
+import utils.Textures;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.glfw.GLFW.*;
 

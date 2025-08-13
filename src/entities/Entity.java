@@ -1,3 +1,7 @@
+package entities;
+
+import utils.PointD;
+
 public class Entity {
     protected int texture;
     protected double textureWidth;

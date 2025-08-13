@@ -1,3 +1,9 @@
+package scenarios;
+
+import entities.Player;
+import game.Model;
+import utils.Textures;
+
 public class ScenarioTransition extends Scenario {
     private Player player;
 

@@ -6,7 +6,24 @@
   <component name="ChangeListManager">
     <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Code cleaned. Added &quot;assets&quot; folder.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/main.png" beforeDir="false" afterPath="$PROJECT_DIR$/assets/main.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EntityChain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/EntityChain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Keyboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Keyboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Level.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Level.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/MovingEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PointD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/PointD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Scenario.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/Scenario.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ScenarioMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ScenarioScore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioScore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ScenarioTransition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioTransition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Shoot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Shoot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Textures.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/Textures.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +42,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/steurendo/DangerousDaveReloaded.git&quot;,
-    &quot;accountId&quot;: &quot;05485157-4743-47b0-8807-4df9bcbb81e1&quot;
+    &quot;accountId&quot;: &quot;66a175cc-e8b2-4b32-934d-b32adacae0b7&quot;
   }
 }</component>
   <component name="MarkdownSettingsMigration">
@@ -35,7 +52,6 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2GEQuBa1pMOlIQwsUJgjVgosNRq" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />

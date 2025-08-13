@@ -1,3 +1,12 @@
+package game;
+
+import entities.Entity;
+import entities.EntityChain;
+import entities.MovingEntity;
+import entities.Player;
+import utils.PointD;
+import utils.Textures;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
