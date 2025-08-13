@@ -10,8 +10,8 @@ public class MovingEntity extends Entity {
     public final static int SHOOT_SPEED = 5;
     private final static int SHOOT_RELOAD = 200;
 
-    private PointD baseLocation;
-    private Shoot shoot;
+    private final PointD baseLocation;
+    private final Shoot shoot;
     private double movingNumber;
     private boolean alive;
     private int deadCounter;
@@ -77,7 +77,7 @@ public class MovingEntity extends Entity {
                 Math.abs(location.y - shootLocation.y) < height / 2 + 3);
     }
 
-    public void update() {
+    public void update(PointD playerLocation) {
         if (!alive && deadCounter >= 0)
             deadCounter--;
         if (deadCounter == 0)
@@ -90,8 +90,7 @@ public class MovingEntity extends Entity {
             if (shootReload > 0)
                 shootReload--;
             if (shootReload == 0) {
-                int direction;
-                direction = new Random().nextInt(2) == 0 ? -1 : 1;
+                int direction = location.x > playerLocation.x ? Directions.LEFT : Directions.RIGHT;
                 shoot.setLocation(new PointD(location.x + (width / 2 * direction), location.y));
                 shoot.setDirection(direction);
                 shootReload = SHOOT_RELOAD;

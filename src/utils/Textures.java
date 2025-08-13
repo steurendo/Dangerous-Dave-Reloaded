@@ -18,10 +18,10 @@ public class Textures {
 
     public Textures() {
         try {
-            textureBackground = loadTexture(ImageIO.read(this.getClass().getResourceAsStream("background.png")));
-            textureEntities = loadTexture(ImageIO.read(this.getClass().getResourceAsStream("entities.png")));
-            textureMovingEntities = loadTexture(ImageIO.read(this.getClass().getResourceAsStream("moving_entities.png")));
-            textureGameParts = loadTexture(ImageIO.read(this.getClass().getResourceAsStream("game_parts.png")));
+            textureBackground = loadTexture(ImageIO.read(ResourceLoader.load(this, "background.png")));
+            textureEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "entities.png")));
+            textureMovingEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "moving_entities.png")));
+            textureGameParts = loadTexture(ImageIO.read(ResourceLoader.load(this, "game_parts.png")));
         } catch (Exception e) {
             e.printStackTrace();
         }

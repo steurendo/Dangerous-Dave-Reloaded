@@ -2,6 +2,8 @@ package entities;
 
 import utils.PointD;
 
+import static entities.Directions.STILL;
+
 public class Shoot {
     private final static double SPEED = 5;
 
@@ -10,7 +12,7 @@ public class Shoot {
 
     public Shoot() {
         location = new PointD();
-        direction = 0;
+        direction = STILL;
     }
 
     public double getX() {
@@ -30,7 +32,7 @@ public class Shoot {
     }
 
     public boolean isVisible() {
-        return direction != 0;
+        return direction != STILL;
     }
 
     public void setLocation(PointD location) {
@@ -43,5 +45,9 @@ public class Shoot {
 
     public void update() {
         location.x += direction * SPEED;
+    }
+
+    public void reset() {
+        direction = STILL;
     }
 }

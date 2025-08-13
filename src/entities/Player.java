@@ -5,8 +5,8 @@ import utils.PointD;
 import java.awt.*;
 
 public class Player {
-    public final static int WIDTH = 22;
-    public final static int HEIGHT = 30;
+    public final static double WIDTH = 22;
+    public final static double HEIGHT = 30;
     public final static double SPEED_FAST = 2;
     public final static double JUMP_POWER = -4;
     public final static double JUMP_SPEED_X = 2;

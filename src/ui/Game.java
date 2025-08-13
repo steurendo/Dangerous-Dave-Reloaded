@@ -19,8 +19,6 @@ public class Game {
     private int windowH;
     private GLFWKeyCallback input;
     private Model model;
-    private Textures textures;
-    private Scenario scenarioMenu;
     private Scenario scenarioLevel;
     private Scenario scenarioTransition;
     private Scenario scenarioScore;
@@ -77,9 +75,9 @@ public class Game {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             //TEXTURES
             //INIZIALIZZAZIONI VARIE
-            textures = new Textures();
+            Textures textures = new Textures();
             model = new Model(textures);
-            scenarioMenu = new ScenarioMenu(model, textures);
+            Scenario scenarioMenu = new ScenarioMenu(model, textures);
             scenarioLevel = new ScenarioLevel(model, textures);
             scenarioTransition = new ScenarioTransition(model, textures);
             scenarioScore = new ScenarioScore(model, textures);
@@ -107,7 +105,7 @@ public class Game {
             glfwSwapBuffers(window);
             if (glfwWindowShouldClose(window)) {
                 active = false;
-                glfwSetWindowShouldClose(window, !active);
+                glfwSetWindowShouldClose(window, true);
             }
         }
         //TERMINA LA SESSIONE GLFW

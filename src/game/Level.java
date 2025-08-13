@@ -10,15 +10,18 @@ import java.awt.*;
 import java.util.*;
 
 public class Level {
-    private boolean[][] map;
-    private int width;
-    private Point spawnpoint;
-    private EntityChain[] entities;
-    private ArrayList<MovingEntity> movingEntities;
-    private Entity[][] entitiesMap;
-    private int texture;
-    private int number;
-    private Level next;
+    public final static int TILES_ALONG_Y = 13;  // 1 SOTTO, DUE SOPRA IN PIù
+    public final static int OFFSET_Y = 2;
+
+    private final boolean[][] map;
+    private final int width;
+    private final Point spawnpoint;
+    private final EntityChain[] entities;
+    private final ArrayList<MovingEntity> movingEntities;
+    private final Entity[][] entitiesMap;
+    private final int texture;
+    private final int number;
+    private final Level next;
     private Level warpzone;
 
     public Level(boolean[][] map, int width, Point spawnpoint, EntityChain[] entities, ArrayList<MovingEntity> movingEntities, Entity[][] entitiesMap, int texture, int number, Level next) {

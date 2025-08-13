@@ -1,27 +1,21 @@
 package scenarios;
 
-import entities.Entity;
-import entities.EntityChain;
-import entities.MovingEntity;
-import entities.Player;
+import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
 import utils.PointD;
 import utils.Textures;
 
+import static game.Level.OFFSET_Y;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class ScenarioLevel extends Scenario {
     private final static int FIGURE_SPEED = 5;
     private final static int MAX_FIGURE_NUMBER = 300;
-    private final static int RIGHT = 1;
-    private final static int LEFT = -1;
-    private final static int UP = -1;
-    private final static int DOWN = 1;
 
-    private Player player;
+    private final Player player;
     private int figureNumber;
     private boolean paused;
     private boolean pauseTrigger;
@@ -225,15 +219,15 @@ public class ScenarioLevel extends Scenario {
 
             if (entity.isVisible()) {
                 textureNumber = (figureNumber / FIGURE_SPEED) % entity.getFiguresNumber();
-                limitY = entity.getY() + entity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (entity.getY() + entity.getHeight() / 2 + 32) / 400;
-                limitYTexture = entity.getY() + entity.getHeight() / 2 + 32 > 332 ? (entity.getTextureY() + entity.getHeight() - (entity.getY() + entity.getHeight() / 2 + 32 - 332)) / entity.getTextureHeight() : (entity.getTextureY() + entity.getHeight()) / entity.getTextureHeight();
+                limitY = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32) / 400;
+                limitYTexture = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? (entity.getTextureY() + entity.getHeight() - (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 - 332)) / entity.getTextureHeight() : (entity.getTextureY() + entity.getHeight()) / entity.getTextureHeight();
                 Textures.bindTexture(entity.getTexture());
                 if (entity.isAlive()) {
                     glBegin(GL_QUADS);
                     glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
-                    glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, (entity.getY() - entity.getHeight() / 2 + 32) / 400);
+                    glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
                     glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
-                    glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, (entity.getY() - entity.getHeight() / 2 + 32) / 400);
+                    glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
                     glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
                     glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, limitY);
                     glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
@@ -242,26 +236,26 @@ public class ScenarioLevel extends Scenario {
                 } else {
                     glBegin(GL_QUADS);
                     glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - Player.HEIGHT / 2 - 1 + 32) / 400));
+                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - Player.HEIGHT / 2 - 1 + 32) / 400));
+                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() + Player.HEIGHT / 2 + 32) / 400));
+                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() + Player.HEIGHT / 2 + 32) / 400));
+                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
                     glEnd();
                 }
                 if (entity.getShoot().isVisible()) {
                     Textures.bindTexture(textures.getTextureMovingEntities());
                     glBegin(GL_QUADS);
-                    glTexCoord2d((((entity.getShoot().getDirection() == 1 ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), (298d / 304));
-                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == 1 ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), (298d / 304));
-                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == 1 ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), 1);
-                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() + 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == 1 ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), 1);
-                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() + 3 + 32) / 400));
+                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), (298d / 304));
+                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), (298d / 304));
+                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), 1);
+                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), 1);
+                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
                     glEnd();
                 }
             }
@@ -271,38 +265,38 @@ public class ScenarioLevel extends Scenario {
         if (player.isAlive()) {
             glBegin(GL_QUADS);
             glTexCoord2d(((40d * player.getFigureNumber()) / 720), 0);
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - Player.HEIGHT / 2 - 1 + 32) / 400));
+            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
             glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), 0);
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - Player.HEIGHT / 2 - 1 + 32) / 400));
+            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
             glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y + Player.HEIGHT / 2 + 32) / 400));
+            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
             glTexCoord2d(((40d * player.getFigureNumber()) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y + Player.HEIGHT / 2 + 32) / 400));
+            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
             glEnd();
         } else {
             glBegin(GL_QUADS);
             glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - Player.HEIGHT / 2 - 1 + 32) / 400));
+            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
             glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - Player.HEIGHT / 2 - 1 + 32) / 400));
+            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
             glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y + Player.HEIGHT / 2 + 32) / 400));
+            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
             glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y + Player.HEIGHT / 2 + 32) / 400));
+            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
             glEnd();
         }
         //SPARI - GIOCATORE
         if (player.getShoot().isVisible()) {
             Textures.bindTexture(textures.getTextureMovingEntities());
             glBegin(GL_QUADS);
-            glTexCoord2d(((player.getShoot().getDirection() == 1 ? 0 : 16d) / 720), (292d / 304));
-            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - 3 + 32) / 400));
-            glTexCoord2d((((player.getShoot().getDirection() == 1 ? 0 : 16d) + 16) / 720), (292d / 304));
-            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - 3 + 32) / 400));
-            glTexCoord2d((((player.getShoot().getDirection() == 1 ? 0 : 16d) + 16) / 720), (298d / 304));
-            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() + 3 + 32) / 400));
-            glTexCoord2d(((player.getShoot().getDirection() == 1 ? 0 : 16d) / 720), (298d / 304));
-            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() + 3 + 32) / 400));
+            glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (292d / 304));
+            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+            glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (292d / 304));
+            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+            glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (298d / 304));
+            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+            glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (298d / 304));
+            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
             glEnd();
         }
         //BACKGROUND
@@ -328,14 +322,14 @@ public class ScenarioLevel extends Scenario {
             currentEntity = entities.getEntity();
             if (currentEntity.isVisible()) {
                 textureNumber = (figureNumber / FIGURE_SPEED + (int) currentEntity.getX() / 32 + (int) currentEntity.getY() / 32) % currentEntity.getFiguresNumber();
-                limitY = currentEntity.getY() + currentEntity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (currentEntity.getY() + currentEntity.getHeight() / 2 + 32) / 400;
-                limitYTexture = currentEntity.getY() + currentEntity.getHeight() / 2 + 32 > 332 ? (currentEntity.getTextureY() + currentEntity.getHeight() - (currentEntity.getY() + currentEntity.getHeight() / 2 + 32 - 332)) / currentEntity.getTextureHeight() : (currentEntity.getTextureY() + currentEntity.getHeight()) / currentEntity.getTextureHeight();
+                limitY = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32) / 400;
+                limitYTexture = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? (currentEntity.getTextureY() + currentEntity.getHeight() - (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 - 332)) / currentEntity.getTextureHeight() : (currentEntity.getTextureY() + currentEntity.getHeight()) / currentEntity.getTextureHeight();
                 Textures.bindTexture(currentEntity.getTexture());
                 glBegin(GL_QUADS);
                 glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
-                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - currentEntity.getHeight() / 2 + 32) / 400);
+                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
                 glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
-                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - currentEntity.getHeight() / 2 + 32) / 400);
+                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
                 glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
                 glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, limitY);
                 glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
@@ -366,36 +360,36 @@ public class ScenarioLevel extends Scenario {
                         player.triggerJetpackToggle();
                 } else
                     player.jetpackToggleUnlock();
-                //UP DOWN
+                //Directions.UP Directions.DOWN
                 if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
                     int directionY;
 
-                    directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? UP : DOWN;
-                    if (player.getDirectionY() == UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
-                        player.setDirectionY(DOWN);
-                    } else if (player.getDirectionY() == DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
-                        player.setDirectionY(UP);
+                    directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
+                    if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
+                        player.setDirectionY(Directions.DOWN);
+                    } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
+                        player.setDirectionY(Directions.UP);
                     else
                         player.setDirectionY(directionY);
                     if (player.isOnJetpack() || player.isClimbing()) {
                         if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + Player.SPEED_FAST * directionY) == 0)
                             player.setSpeedY(Player.SPEED_FAST * directionY);
-                    } else if (directionY == UP) {
+                    } else if (directionY == Directions.UP) {
                         if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
                             player.setSpeedY(Player.JUMP_POWER);
                             player.setJumpCooldown(Player.JUMP_COOLDOWN);
                         }
                     }
                 }
-                //LEFT RIGHT
+                //Directions.LEFT Directions.RIGHT
                 if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
                     int directionX;
 
-                    directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? RIGHT : LEFT;
-                    if (player.getDirectionX() == RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
-                        player.setDirectionX(LEFT);
-                    else if (player.getDirectionX() == LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
-                        player.setDirectionX(RIGHT);
+                    directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? Directions.RIGHT : Directions.LEFT;
+                    if (player.getDirectionX() == Directions.RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
+                        player.setDirectionX(Directions.LEFT);
+                    else if (player.getDirectionX() == Directions.LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
+                        player.setDirectionX(Directions.RIGHT);
                     else
                         player.setDirectionX(directionX);
                     if (model.getCurrentLevel().checkCollisionX(player.getX() + (player.isClimbing() || player.isOnJetpack() ? Player.SPEED_FAST : Player.SPEED_SLOW) * directionX, player.getY()) == 0) {
@@ -451,7 +445,7 @@ public class ScenarioLevel extends Scenario {
                 if (entity.isAlive())
                     if (player.checkCollisionWithEntity(entity))
                         entity.die();
-                entity.update();
+                entity.update(player.getLocation());
             }
         }
         if (player.isAlive()) {
@@ -459,13 +453,13 @@ public class ScenarioLevel extends Scenario {
             if (!player.isOnJetpack() && !player.isClimbing()) {
                 double speedToSet;
 
-                speedToSet = player.getSpeedY() + Player.GRAVITY < Player.GRAVITY_MAX ? player.getSpeedY() + Player.GRAVITY : Player.GRAVITY_MAX;
-                if (player.isFalling() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == DOWN) {
+                speedToSet = Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX);
+                if (player.isFalling() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == Directions.DOWN) {
                     player.setY(player.getY() + (32 - (player.getY() % 32 + Player.HEIGHT / 2)) % 32);
                     player.setSpeedY(0);
                     player.setDirectionX(0);
                 }
-                if (player.isJumping() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == UP) {
+                if (player.isJumping() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == Directions.UP) {
                     player.setSpeedY(Player.GRAVITY_MAX);
                 }
                 if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == 0)
