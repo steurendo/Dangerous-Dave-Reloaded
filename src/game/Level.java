@@ -42,11 +42,17 @@ public class Level {
     }
 
     public int checkCollisionX(double x, double y) {
-        if (map[(int) ((x > (int) x ? Math.ceil(x) : x) + (Player.WIDTH / 2 - 1)) / 32][(int) (y + (Player.HEIGHT / 2 - 1)) / 32] ||
-                map[(int) ((x > (int) x ? Math.ceil(x) : x) + (Player.WIDTH / 2 - 1)) / 32][(int) (y - Player.HEIGHT / 2) / 32])
+        int coordXRight, coordXLeft, coordYDown, coordYUp;
+
+        coordXLeft = (int) ((x > (int) x ? Math.ceil(x) : x) + (Player.WIDTH / 2 - 1)) / 32;
+        coordXRight = (int) (x - Player.WIDTH / 2) / 32;
+        coordYDown = (int) (y + (Player.HEIGHT / 2 - 1)) / 32;
+        if (coordYDown == TILES_ALONG_Y) coordYDown = 0;
+        coordYUp = (int) (y - Player.HEIGHT / 2) / 32;
+        if (coordYUp < 0) coordYUp = TILES_ALONG_Y - 1;
+        if (map[coordXLeft][coordYDown] || map[coordXLeft][coordYUp])
             return 1;
-        if (map[(int) (x - Player.WIDTH / 2) / 32][(int) (y + (Player.HEIGHT / 2 - 1)) / 32] ||
-                map[(int) (x - Player.WIDTH / 2) / 32][(int) (y - Player.HEIGHT / 2) / 32])
+        if (map[coordXRight][coordYDown] || map[coordXRight][coordYUp])
             return -1;
 
         return 0;
@@ -57,11 +63,18 @@ public class Level {
     }
 
     public int checkCollisionY(double x, double y) {
-        if (map[(int) (x + (Player.WIDTH / 2 - 1)) / 32][(int) ((y > (int) y ? Math.ceil(y) : y) + (Player.HEIGHT / 2 - 1)) / 32] ||
-                map[(int) (x - Player.WIDTH / 2) / 32][(int) ((y > (int) y ? Math.ceil(y) : y) + (Player.HEIGHT / 2 - 1)) / 32])
+        int coordXRight, coordXLeft, coordYUpDown, coordYUp;
+
+        coordXLeft = (int) (x + (Player.WIDTH / 2 - 1)) / 32;
+        coordXRight = (int) (x - Player.WIDTH / 2) / 32;
+        coordYUpDown = (int) ((y > (int) y ? Math.ceil(y) : y) + (Player.HEIGHT / 2 - 1)) / 32;
+        if (coordYUpDown == TILES_ALONG_Y) coordYUpDown = 0;
+        coordYUp = (int) (y - Player.HEIGHT / 2) / 32;
+        if (coordYUp < 0) coordYUp = TILES_ALONG_Y - 1;
+        System.out.println(coordYUpDown + "   " + coordYUp);
+        if (map[coordXLeft][coordYUpDown] || map[coordXRight][coordYUpDown])
             return 1;
-        if (map[(int) (x + (Player.WIDTH / 2 - 1)) / 32][(int) (y - Player.HEIGHT / 2) / 32] ||
-                map[(int) (x - Player.WIDTH / 2) / 32][(int) (y - Player.HEIGHT / 2) / 32])
+        if (map[coordXLeft][coordYUp] || map[coordXRight][coordYUp])
             return -1;
 
         return 0;
@@ -105,6 +118,9 @@ public class Level {
     }
 
     public Entity getEntity(int x, int y) {
+        if (x < 0 || x == width) return null;
+        if (y < 0) y += TILES_ALONG_Y;
+        if (y == TILES_ALONG_Y) y = 0;
         return entitiesMap[x][y];
     }
 
@@ -114,6 +130,10 @@ public class Level {
 
     public void clearEntity(int x, int y) {
         entitiesMap[x][y] = null;
+    }
+
+    public void clearEntity(Entity entity) {
+        entitiesMap[(int) entity.getX() / 32][(int) entity.getY() / 32] = null;
     }
 
     public void init() {

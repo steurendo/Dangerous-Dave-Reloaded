@@ -15,7 +15,7 @@ public class Model {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
         levelsRoot = loader.loadLevelsStructure();
-        currentLevel = levelsRoot;
+        currentLevel = levelsRoot.getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext();
         player = new Player();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
     }

@@ -4,6 +4,8 @@ import utils.PointD;
 
 import java.awt.*;
 
+import static game.Level.TILES_ALONG_Y;
+
 public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
@@ -214,6 +216,8 @@ public class Player {
 
     public void moveY() {
         location.y += speedY;
+        if (location.y < 0) location.y += TILES_ALONG_Y * 32;
+        if (location.y >= TILES_ALONG_Y * 32) location.y -= TILES_ALONG_Y * 32;
     }
 
     //RICARICA IL VALORE DEL JETPACK

@@ -7,6 +7,8 @@ import ui.Keyboard;
 import utils.PointD;
 import utils.Textures;
 
+import java.awt.*;
+
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -341,6 +343,7 @@ public class ScenarioLevel extends Scenario {
     }
 
     public void commands() {
+        // PAUSA
         if (Keyboard.isKeyDown(GLFW_KEY_P)) {
             if (pauseTrigger) {
                 paused = !paused;
@@ -348,72 +351,72 @@ public class ScenarioLevel extends Scenario {
             }
         } else
             pauseTrigger = true;
-        if (!paused) {
-            player.update();
-            if (player.isAlive()) {
-                //SPARO
-                if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
-                    player.shoot();
-                //JETPACK
-                if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
-                    if (player.getJetpackValue() > 0 && player.getJetpackToggle())
-                        player.triggerJetpackToggle();
-                } else
-                    player.jetpackToggleUnlock();
-                //Directions.UP Directions.DOWN
-                if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
-                    int directionY;
+        if (paused) return;
 
-                    directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
-                    if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
-                        player.setDirectionY(Directions.DOWN);
-                    } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
-                        player.setDirectionY(Directions.UP);
-                    else
-                        player.setDirectionY(directionY);
-                    if (player.isOnJetpack() || player.isClimbing()) {
-                        if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + Player.SPEED_FAST * directionY) == 0)
-                            player.setSpeedY(Player.SPEED_FAST * directionY);
-                    } else if (directionY == Directions.UP) {
-                        if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
-                            player.setSpeedY(Player.JUMP_POWER);
-                            player.setJumpCooldown(Player.JUMP_COOLDOWN);
-                        }
+        player.update();
+        if (player.isAlive()) {
+            //SPARO
+            if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
+                player.shoot();
+            //JETPACK
+            if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
+                if (player.getJetpackValue() > 0 && player.getJetpackToggle())
+                    player.triggerJetpackToggle();
+            } else
+                player.jetpackToggleUnlock();
+            //Directions.UP Directions.DOWN
+            if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
+                int directionY;
+
+                directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
+                if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
+                    player.setDirectionY(Directions.DOWN);
+                } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
+                    player.setDirectionY(Directions.UP);
+                else
+                    player.setDirectionY(directionY);
+                if (player.isOnJetpack() || player.isClimbing()) {
+                    if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + Player.SPEED_FAST * directionY) == 0)
+                        player.setSpeedY(Player.SPEED_FAST * directionY);
+                } else if (directionY == Directions.UP) {
+                    if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
+                        player.setSpeedY(Player.JUMP_POWER);
+                        player.setJumpCooldown(Player.JUMP_COOLDOWN);
                     }
                 }
-                //Directions.LEFT Directions.RIGHT
-                if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
-                    int directionX;
-
-                    directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? Directions.RIGHT : Directions.LEFT;
-                    if (player.getDirectionX() == Directions.RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
-                        player.setDirectionX(Directions.LEFT);
-                    else if (player.getDirectionX() == Directions.LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
-                        player.setDirectionX(Directions.RIGHT);
-                    else
-                        player.setDirectionX(directionX);
-                    if (model.getCurrentLevel().checkCollisionX(player.getX() + (player.isClimbing() || player.isOnJetpack() ? Player.SPEED_FAST : Player.SPEED_SLOW) * directionX, player.getY()) == 0) {
-                        if (player.isClimbing() || player.isOnJetpack())
-                            player.setSpeedX(Player.SPEED_FAST * directionX);
-                        else if (player.isJumping() || player.isFalling())
-                            player.setSpeedX(Player.JUMP_SPEED_X * directionX);
-                        else
-                            player.setSpeedX(Player.SPEED_SLOW * directionX);
-                        //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
-                    }
-                }
-                update();
-            } else {
-                if (player.getDeadCounter() == 0) {
-                    if (player.getLives() > 0) {
-                        player.setLocation(new PointD(model.getCurrentLevel().getSpawnpoint().x * 32 + 16, model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
-                        player.restart();
-                        update();
-                    } else
-                        model.reset();
-                } else
-                    update();
             }
+            //Directions.LEFT Directions.RIGHT
+            if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
+                int directionX;
+
+                directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? Directions.RIGHT : Directions.LEFT;
+                if (player.getDirectionX() == Directions.RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
+                    player.setDirectionX(Directions.LEFT);
+                else if (player.getDirectionX() == Directions.LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
+                    player.setDirectionX(Directions.RIGHT);
+                else
+                    player.setDirectionX(directionX);
+                if (model.getCurrentLevel().checkCollisionX(player.getX() + (player.isClimbing() || player.isOnJetpack() ? Player.SPEED_FAST : Player.SPEED_SLOW) * directionX, player.getY()) == 0) {
+                    if (player.isClimbing() || player.isOnJetpack())
+                        player.setSpeedX(Player.SPEED_FAST * directionX);
+                    else if (player.isJumping() || player.isFalling())
+                        player.setSpeedX(Player.JUMP_SPEED_X * directionX);
+                    else
+                        player.setSpeedX(Player.SPEED_SLOW * directionX);
+                    //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
+                }
+            }
+            update();
+        } else {
+            if (player.getDeadCounter() == 0) {
+                if (player.getLives() > 0) {
+                    player.setLocation(new PointD(model.getCurrentLevel().getSpawnpoint().x * 32 + 16, model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
+                    player.restart();
+                    update();
+                } else
+                    model.reset();
+            } else
+                update();
         }
     }
 
@@ -451,19 +454,17 @@ public class ScenarioLevel extends Scenario {
         if (player.isAlive()) {
             //GRAVITA'
             if (!player.isOnJetpack() && !player.isClimbing()) {
-                double speedToSet;
-
-                speedToSet = Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX);
-                if (player.isFalling() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == Directions.DOWN) {
+                PointD speed = new PointD(player.getSpeedX(), Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX));
+                if (player.isFalling() && model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == Directions.DOWN) {
                     player.setY(player.getY() + (32 - (player.getY() % 32 + Player.HEIGHT / 2)) % 32);
                     player.setSpeedY(0);
                     player.setDirectionX(0);
                 }
-                if (player.isJumping() && model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == Directions.UP) {
+                if (player.isJumping() && model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == Directions.UP) {
                     player.setSpeedY(Player.GRAVITY_MAX);
                 }
-                if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + speedToSet) == 0)
-                    player.setSpeedY(speedToSet);
+                if (model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == 0)
+                    player.setSpeedY(speed.y);
             }
             //SPOSTAMENTO ORIZZONTALE
             if (player.getSpeedX() != 0) {
@@ -478,18 +479,22 @@ public class ScenarioLevel extends Scenario {
             }
             if (player.getSpeedY() < Player.JUMP_POWER)
                 player.setSpeedY(Player.JUMP_POWER);
-            if (player.checkCollisionWithEntity(currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1)) &&
-                    !currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1).isMortal())
-                currentLevel.clearEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
-            if (player.checkCollisionWithEntity(currentLevel.getEntity((int) player.getX() / 32 + 1, (int) player.getY() / 32)) &&
-                    !currentLevel.getEntity((int) player.getX() / 32 + 1, (int) player.getY() / 32).isMortal())
-                currentLevel.clearEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
-            if (player.checkCollisionWithEntity(currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 - 1)) &&
-                    !currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 - 1).isMortal())
-                currentLevel.clearEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
-            if (player.checkCollisionWithEntity(currentLevel.getEntity((int) player.getX() / 32 - 1, (int) player.getY() / 32)) &&
-                    !currentLevel.getEntity((int) player.getX() / 32 - 1, (int) player.getY() / 32).isMortal())
-                currentLevel.clearEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
+
+            // COLLISIONI CON ENTITà
+            Entity entity;
+            // COLLISIONE CON ENTITà (x, y + 1)
+            entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
+            if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
+            // COLLISIONE CON ENTITà (x + 1, y)
+            entity = currentLevel.getEntity((int) player.getX() / 32 + 1, (int) player.getY() / 32);
+            if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
+            // COLLISIONE CON ENTITà (x, y - 1)
+            entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 - 1);
+            if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
+            // COLLISIONE CON ENTITà (x - 1, y)
+            entity = currentLevel.getEntity((int) player.getX() / 32 - 1, (int) player.getY() / 32);
+            if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
+
             if (player.hasPassedLevel()) {
                 if (model.getCurrentLevel().getNext() != null)
                     model.nextLevel();
