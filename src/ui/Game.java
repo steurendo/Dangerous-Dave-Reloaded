@@ -1,5 +1,6 @@
 package ui;
 
+import game.CollisionType;
 import game.Model;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -101,6 +102,9 @@ public class Game {
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             switchScenario[model.getState()].commands();
+            switchScenario[model.getState()].collisions(CollisionType.World);
+            switchScenario[model.getState()].collisions(CollisionType.Entity);
+            switchScenario[model.getState()].update();
             switchScenario[model.getState()].render();
             glfwSwapBuffers(window);
             if (glfwWindowShouldClose(window)) {

@@ -71,7 +71,6 @@ public class Level {
         if (coordYUpDown == TILES_ALONG_Y) coordYUpDown = 0;
         coordYUp = (int) (y - Player.HEIGHT / 2) / 32;
         if (coordYUp < 0) coordYUp = TILES_ALONG_Y - 1;
-        System.out.println(coordYUpDown + "   " + coordYUp);
         if (map[coordXLeft][coordYUpDown] || map[coordXRight][coordYUpDown])
             return 1;
         if (map[coordXLeft][coordYUp] || map[coordXRight][coordYUp])
