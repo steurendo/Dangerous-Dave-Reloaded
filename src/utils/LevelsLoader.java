@@ -8,8 +8,6 @@ import game.Level;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 
 import static game.Level.OFFSET_Y;
@@ -74,81 +72,85 @@ public class LevelsLoader {
     }
 
     public Level loadLevelsStructure() {
+        Level firstLevel = null;
         try {
             int x, y;
-            BufferedReader in;
             char[] line;
             BufferedImage tilemapPicture;
             BufferedImage[][] tilemap;
 
             tilemapPicture = ImageIO.read(ResourceLoader.load(this, "tilemap.png"));
-            //DEFINISCO I TILES DISPONIBILI
+            // Definisco i tiles disponibili
             tilemap = new BufferedImage[8][7];
             for (x = 0; x < 8; x++)
                 for (y = 0; y < 7; y++)
                     tilemap[x][y] = tilemapPicture.getSubimage(x * 32, y * 32, 32, 32);
-            //INTESTAZIONE
-            in = new BufferedReader(new FileReader("gamedata.dat"));//new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("gamedata.dat")));
+
+            // Inizializzo il reader
+            GamedataReader.init();
             line = new char[8];
-            in.read(line, 0, 8);
-            //SKIPPA IL NUMERO DI WARPZONE
-            in.read(new char[8], 0, 8);
-            //CARICA I LIVELLI
-            return createLevelsStructure(in, tilemap, 1, decrypt(line));
+
+            // Numero di livelli
+            GamedataReader.read(line);
+            int levelsCount = decrypt(line);
+
+            // Numero di warpzones
+            GamedataReader.read(line);
+            int warpzonesCount = decrypt(line);
+
+            // Creo la struttura dei livelli ed ottengo il primo livello
+            firstLevel = createLevelsStructure(tilemap, 1, levelsCount);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return firstLevel;
     }
 
 
-    private Level createLevelsStructure(BufferedReader in, BufferedImage[][] tilemap, int number, int remains)
+    private Level createLevelsStructure(BufferedImage[][] tilemap, int levelNumber, int remainingLevels)
             throws Exception {
-        if (remains == 0)
-            return null;
+        if (remainingLevels == 0) return null;
 
-        char[] line;
-        boolean hasWarpzone;
+        char[] line = new char[8];
         boolean[][] map;
-        int width, x, y, tileCode;
-        Point spawnpoint, tile;
+        int[][] mapCodes;
+        int levelWidth, tileCode;
+        boolean hasWarpzone;
+        Point spawnpoint;
         EntityChain[] entities;
         ArrayList<MovingEntity> movingEntities;
         Entity[][] entitiesMap;
-        Level level;
         BufferedImage background;
         Graphics gD;
 
-        line = new char[8];
-        //LUNGHEZZA LIVELLO
-        in.read(line, 0, 8);
-        width = decrypt(line);
-        //SPAWNPOINT
-        in.read(line, 0, 8);
+        // Lunghezza del livello
+        GamedataReader.read(line);
+        levelWidth = decrypt(line);
+
+        // Spawnpoint
+        GamedataReader.read(line);
         spawnpoint = new Point();
-        spawnpoint.y = decrypt(line) / width;
-        spawnpoint.x = decrypt(line) - width * spawnpoint.y;
+        spawnpoint.y = decrypt(line) / levelWidth;
+        spawnpoint.x = decrypt(line) - levelWidth * spawnpoint.y;
         spawnpoint.y += OFFSET_Y;
-        //LINK
-        in.read(line, 0, 8);
+
+        // Link alla warpzone
+        GamedataReader.read(line);
         hasWarpzone = decrypt(line) >= 0;
-        //MAPPA + DISEGNO LIVELLO
-        map = new boolean[width][TILES_ALONG_Y];
-        background = new BufferedImage(width * 32, 320, BufferedImage.TYPE_INT_ARGB);
-        gD = background.getGraphics();
-        entities = new EntityChain[width];
+
+        // Mappa logica del livello + disegno
+        map = new boolean[levelWidth][TILES_ALONG_Y];
+        mapCodes = new int[levelWidth][TILES_ALONG_Y];
+        entities = new EntityChain[levelWidth];
         movingEntities = new ArrayList<>();
-        entitiesMap = new Entity[width][TILES_ALONG_Y];
-        for (x = 0; x < width; x++) {
-            for (y = OFFSET_Y; y < TILES_ALONG_Y - (3 - OFFSET_Y); y++) {
-                in.read(line, 0, 8);
+        entitiesMap = new Entity[levelWidth][TILES_ALONG_Y];
+        for (int x = 0; x < levelWidth; x++) {
+            for (int y = OFFSET_Y; y < TILES_ALONG_Y - (3 - OFFSET_Y); y++) {
+                GamedataReader.read(line);
                 tileCode = decrypt(line);
-                tile = new Point();
-                tile.y = tileCode / 8;
-                tile.x = tileCode - 8 * tile.y;
+                mapCodes[x][y] = tileCode;
                 if (tileCode >= 1 && tileCode <= 18) { //BLOCCO
                     map[x][y] = true;
-                    gD.drawImage(tilemap[tile.x][tile.y], x * 32, (y - OFFSET_Y) * 32, null);
                     entitiesMap[x][y] = null;
                 } else if (tileCode != 0) { //ENTITA'
                     Entity entity;
@@ -168,10 +170,39 @@ public class LevelsLoader {
                 }
             }
         }
+
+        // Disegno del livello
+        background = new BufferedImage(levelWidth * 32, 320, BufferedImage.TYPE_INT_ARGB);
+        gD = background.getGraphics();
+
+        for (int x = 0; x < levelWidth; x++) {
+            for (int y = OFFSET_Y; y < TILES_ALONG_Y - (3 - OFFSET_Y); y++) {
+                tileCode = mapCodes[x][y];
+                Point tile = new Point();
+                tile.y = tileCode / 8;
+                tile.x = tileCode - 8 * tile.y;
+                if (tileCode >= 1 && tileCode <= 18) {
+                    gD.drawImage(tilemap[tile.x][tile.y], x * 32, (y - OFFSET_Y) * 32, null);
+                }
+            }
+        }
         gD.dispose();
-        level = new Level(map, width, spawnpoint, entities, movingEntities, entitiesMap, Textures.loadTexture(background), number, createLevelsStructure(in, tilemap, number + 1, remains - 1));
-//        if (hasWarpzone)
-//            level.setWarpzone(createWarpzone(level, in, tilemap));
+
+        // Creazione del livello successivo, per poterlo collegare
+        Level nextLevel = createLevelsStructure(tilemap, levelNumber + 1, remainingLevels - 1);
+        // Creazione del livello
+        Level level = new Level(
+                map,
+                levelWidth,
+                spawnpoint,
+                entities,
+                movingEntities,
+                entitiesMap,
+                Textures.loadTexture(background),
+                levelNumber,
+                nextLevel
+        );
+        if (hasWarpzone) level.setWarpzone(createLevelsStructure(tilemap, levelNumber, 1));
 
         return level;
     }
