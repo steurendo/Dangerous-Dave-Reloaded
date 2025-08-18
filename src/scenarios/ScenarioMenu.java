@@ -1,6 +1,5 @@
 package scenarios;
 
-import game.CollisionType;
 import game.Model;
 import ui.Keyboard;
 import utils.Textures;
@@ -26,7 +25,7 @@ public class ScenarioMenu extends Scenario {
     }
 
     @Override
-    public void collisions(CollisionType type) {
+    public void collisions() {
     }
 
     @Override

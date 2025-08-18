@@ -1,7 +1,6 @@
 package scenarios;
 
 import entities.Player;
-import game.CollisionType;
 import game.Model;
 import utils.Textures;
 
@@ -18,7 +17,7 @@ public class ScenarioTransition extends Scenario {
     }
 
     @Override
-    public void collisions(CollisionType type) {
+    public void collisions() {
     }
 
     @Override

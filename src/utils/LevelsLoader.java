@@ -170,8 +170,8 @@ public class LevelsLoader {
         }
         gD.dispose();
         level = new Level(map, width, spawnpoint, entities, movingEntities, entitiesMap, Textures.loadTexture(background), number, createLevelsStructure(in, tilemap, number + 1, remains - 1));
-        //if (hasWarpzone)
-        //level.setWarpzone(createWarpzone(level, in, tilemap));
+//        if (hasWarpzone)
+//            level.setWarpzone(createWarpzone(level, in, tilemap));
 
         return level;
     }

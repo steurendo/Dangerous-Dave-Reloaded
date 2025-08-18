@@ -1,6 +1,5 @@
 package scenarios;
 
-import game.CollisionType;
 import game.Model;
 import utils.Textures;
 
@@ -15,7 +14,7 @@ public class ScenarioScore extends Scenario {
     }
 
     @Override
-    public void collisions(CollisionType type) {
+    public void collisions() {
     }
 
     @Override

@@ -37,7 +37,11 @@ public class Model {
         player.reset();
         currentLevel = levelsRoot;
         currentLevel.init();
-        player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
+        // Player nello spawnpoint
+        PointD spawnpoint = new PointD(
+                currentLevel.getSpawnpoint().x * 32 + 16,
+                currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
+        player.setLocation(spawnpoint);
     }
 
     public void start() {

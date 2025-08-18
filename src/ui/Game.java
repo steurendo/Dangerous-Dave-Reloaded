@@ -1,6 +1,5 @@
 package ui;
 
-import game.CollisionType;
 import game.Model;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -40,8 +39,7 @@ public class Game {
             //CONTROLLO PRESSIONE TASTI
             glfwSetKeyCallback(window, input = new Keyboard());
             //AZIONI IN SEGUITO AD UN RESIZE
-            glfwSetFramebufferSizeCallback(window, (window, width, height) ->
-            {
+            glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
                 windowW = width;
                 windowH = height;
                 glViewport(0, 0, width, height);
@@ -102,8 +100,7 @@ public class Game {
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             switchScenario[model.getState()].commands();
-            switchScenario[model.getState()].collisions(CollisionType.World);
-            switchScenario[model.getState()].collisions(CollisionType.Entity);
+            switchScenario[model.getState()].collisions();
             switchScenario[model.getState()].update();
             switchScenario[model.getState()].render();
             glfwSwapBuffers(window);

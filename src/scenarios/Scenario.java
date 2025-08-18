@@ -1,6 +1,5 @@
 package scenarios;
 
-import game.CollisionType;
 import game.Model;
 import utils.Textures;
 
@@ -10,7 +9,7 @@ public abstract class Scenario {
 
     public abstract void commands();
 
-    public abstract void collisions(CollisionType type);
+    public abstract void collisions();
 
     public abstract void update();
 

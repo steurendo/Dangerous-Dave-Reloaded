@@ -127,6 +127,10 @@ public class Level {
         this.warpzone = warpzone;
     }
 
+    public boolean hasWarpzone() {
+        return warpzone != null;
+    }
+
     public void clearEntity(int x, int y) {
         entitiesMap[x][y] = null;
     }
