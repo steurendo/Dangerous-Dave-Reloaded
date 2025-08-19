@@ -19,7 +19,17 @@ public class PointD {
         this(point.x, point.y);
     }
 
+    @Override
+    public String toString() {
+        return "Point (" + x + "; " + y + ")";
+    }
+
+    @Override
     public PointD clone() {
         return new PointD(x, y);
+    }
+
+    public PointD plus(PointD point) {
+        return new PointD(x + point.x, y + point.y);
     }
 }

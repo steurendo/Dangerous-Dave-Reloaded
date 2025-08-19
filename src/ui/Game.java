@@ -95,7 +95,16 @@ public class Game {
     }
 
     public void start() {
+        double t0 = glfwGetTime(), t1 = glfwGetTime(), deltaT, inc = 0;
         while (active) {
+            t0 = t1;
+            t1 = glfwGetTime();
+            deltaT = t1 - t0;
+            inc += deltaT;
+            if (inc >= 1) {
+//                System.out.println("Tick " + inc);
+                inc = 0;
+            }
             glfwPollEvents();
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

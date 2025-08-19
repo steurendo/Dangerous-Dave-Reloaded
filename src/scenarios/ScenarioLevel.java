@@ -30,36 +30,10 @@ public class ScenarioLevel extends Scenario {
         pauseTrigger = true;
     }
 
-    private void drawEntities(EntityChain entities, double viewport) {
-        if (entities != null) {
-            Entity currentEntity;
-            int textureNumber;
-            double limitYTexture, limitY;
-
-            currentEntity = entities.getEntity();
-            if (currentEntity.isVisible()) {
-                textureNumber = (figureNumber / FIGURE_SPEED + (int) currentEntity.getX() / 32 + (int) currentEntity.getY() / 32) % currentEntity.getFiguresNumber();
-                limitY = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32) / 400;
-                limitYTexture = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? (currentEntity.getTextureY() + currentEntity.getHeight() - (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 - 332)) / currentEntity.getTextureHeight() : (currentEntity.getTextureY() + currentEntity.getHeight()) / currentEntity.getTextureHeight();
-                Textures.bindTexture(currentEntity.getTexture());
-                glBegin(GL_QUADS);
-                glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
-                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
-                glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
-                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
-                glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
-                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, limitY);
-                glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
-                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, limitY);
-                glEnd();
-            }
-            drawEntities(entities.getNext(), viewport);
-        }
-    }
 
     @Override
     public void commands() {
-        // PAUSA
+        // Pausa (P)
         if (Keyboard.isKeyDown(GLFW_KEY_P)) {
             if (pauseTrigger) {
                 paused = !paused;
@@ -69,33 +43,23 @@ public class ScenarioLevel extends Scenario {
             pauseTrigger = true;
         if (paused) return;
 
-        if (!player.isAlive()) return;
-//        if (!player.isAlive()) {
-//            if (player.getDeadCounter() == 0) {
-//                if (player.getLives() > 0) {
-//                    PointD spawnpoint = new PointD(
-//                            model.getCurrentLevel().getSpawnpoint().x * 32 + 16,
-//                            model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
-//                    player.setLocation(spawnpoint);
-//                    player.restart();
-//                } else
-//                    model.reset();
-//            }
-//            return;
-//        }
+        player.update();
 
-        //SPARO
+        // Se il player sta morendo, non vengono processati comandi
+        if (!player.isAlive()) return;
+
+        // Sparo (Ctrl)
         if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
             player.shoot();
 
-        //JETPACK
+        //Jetpack (Shift)
         if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
-            if (player.getJetpackValue() > 0 && player.getJetpackToggle())
+            if (player.getJetpackValue() > 0 && player.getJetpackToggle()) {
                 player.triggerJetpackToggle();
-        } else
-            player.jetpackToggleUnlock();
+            }
+        } else if (!player.getJetpackToggle()) player.jetpackToggleUnlock();
 
-        //Directions.UP Directions.DOWN
+        // Spostamenti verticali (Freccia su, Freccia giù)
         if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
             int directionY;
 
@@ -117,7 +81,7 @@ public class ScenarioLevel extends Scenario {
             }
         }
 
-        //Directions.LEFT Directions.RIGHT
+        // Spostamenti orizzontali (Freccia sinistra, Freccia destra)
         if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
             int directionX;
 
@@ -144,12 +108,11 @@ public class ScenarioLevel extends Scenario {
 
     @Override
     public void collisions() {
-        if (!player.isAlive()) return;
+        if (!player.isAlive() || paused) return;
 
         // Controllo che il giocatore non stia andando in una warpzone
         warpzoneCheck();
         // Verifico collisioni
-        collisionsWithWorld();
         collisionsWithEntities();
         collisionsWithMovingEntities();
     }
@@ -162,9 +125,6 @@ public class ScenarioLevel extends Scenario {
         if (playerTouchingLeftBorder || playerTouchingRightBorder) {
             if (currentLevel.hasWarpzone()) model.nextWarpzone();
         }
-    }
-
-    private void collisionsWithWorld() {
     }
 
     private void collisionsWithEntities() {
@@ -204,14 +164,13 @@ public class ScenarioLevel extends Scenario {
                 if (entity.isAlive())
                     if (player.checkCollisionWithEntity(entity))
                         entity.die();
-                entity.update(player.getLocation());
             }
         }
     }
 
     @Override
     public void update() {
-        Level currentLevel = model.getCurrentLevel();
+        if (paused) return;
         player.updateFigureNumber();
         figureNumber = (figureNumber + 1) % MAX_FIGURE_NUMBER;
 
@@ -227,7 +186,10 @@ public class ScenarioLevel extends Scenario {
                     model.reset();
             }
         }
+
         player.update();
+        for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
+            entity.update(player.getLocation());
 
         //SPARO
         if (player.getShoot().isVisible())
@@ -288,7 +250,7 @@ public class ScenarioLevel extends Scenario {
             viewport = playerLocation.x - 320;
         //PUNTEGGIO
         for (i = 0; i < 7; i++) {
-            Integer digit;
+            int digit;
             digit = player.getScore() / (int) Math.pow(10, 6 - i) % 10;
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
@@ -304,7 +266,7 @@ public class ScenarioLevel extends Scenario {
         }
         //NUMERO LIVELLO
         for (i = 0; i < 2; i++) {
-            Integer digit;
+            int digit;
 
             digit = model.getCurrentLevel().getNumber() / (int) Math.pow(10, 1 - i) % 10;
             Textures.bindTexture(textures.getTextureGameParts());
@@ -448,10 +410,7 @@ public class ScenarioLevel extends Scenario {
             startX = 0;
         else
             startX = (int) viewport / 32 - 5;
-        if ((int) viewport / 32 + 25 > levelWidth / 32)
-            endX = levelWidth / 32;
-        else
-            endX = (int) viewport / 32 + 25;
+        endX = Math.min((int) viewport / 32 + 25, levelWidth / 32);
         //ENTITA'
         for (i = startX; i < endX; i++)
             drawEntities(model.getCurrentLevel().getEntities()[i], viewport);
@@ -554,5 +513,32 @@ public class ScenarioLevel extends Scenario {
         glTexCoord2d(0, 1);
         glVertex2d(0, 1);
         glEnd();
+    }
+
+    private void drawEntities(EntityChain entities, double viewport) {
+        if (entities != null) {
+            Entity currentEntity;
+            int textureNumber;
+            double limitYTexture, limitY;
+
+            currentEntity = entities.getEntity();
+            if (currentEntity.isVisible()) {
+                textureNumber = (figureNumber / FIGURE_SPEED + (int) currentEntity.getX() / 32 + (int) currentEntity.getY() / 32) % currentEntity.getFiguresNumber();
+                limitY = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32) / 400;
+                limitYTexture = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? (currentEntity.getTextureY() + currentEntity.getHeight() - (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 - 332)) / currentEntity.getTextureHeight() : (currentEntity.getTextureY() + currentEntity.getHeight()) / currentEntity.getTextureHeight();
+                Textures.bindTexture(currentEntity.getTexture());
+                glBegin(GL_QUADS);
+                glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
+                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
+                glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), (currentEntity.getTextureY()) / currentEntity.getTextureHeight());
+                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, (currentEntity.getY() - OFFSET_Y * 32 - currentEntity.getHeight() / 2 + 32) / 400);
+                glTexCoord2d((textureNumber * currentEntity.getWidth() + currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
+                glVertex2d((currentEntity.getX() + currentEntity.getWidth() / 2 - viewport) / 640, limitY);
+                glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
+                glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, limitY);
+                glEnd();
+            }
+            drawEntities(entities.getNext(), viewport);
+        }
     }
 }

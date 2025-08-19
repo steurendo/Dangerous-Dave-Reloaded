@@ -21,7 +21,7 @@ public class Level {
     private final Entity[][] entitiesMap;
     private final int texture;
     private final int number;
-    private final Level next;
+    private Level next;
     private Level warpzone;
 
     public Level(boolean[][] map, int width, Point spawnpoint, EntityChain[] entities, ArrayList<MovingEntity> movingEntities, Entity[][] entitiesMap, int texture, int number, Level next) {
@@ -38,7 +38,16 @@ public class Level {
     }
 
     public boolean checkPureCollision(double x, double y) {
-        return map[(int) (x > (int) x ? Math.ceil(x) : x) / 32][(int) (y > (int) y ? Math.ceil(y) : y) / 32];
+        if (x < 0 || x >= width * 32) return true;
+        if (y < 0) y += TILES_ALONG_Y * 32;
+        if (y >= TILES_ALONG_Y * 32) y -= TILES_ALONG_Y * 32;
+        int mapX = (int) (x / 32);
+        int mapY = (int) (y / 32);
+        return map[mapX][mapY];
+    }
+
+    public boolean checkPureCollision(PointD point) {
+        return checkPureCollision(point.x, point.y);
     }
 
     public int checkCollisionX(double x, double y) {
@@ -102,6 +111,10 @@ public class Level {
 
     public Level getNext() {
         return next;
+    }
+
+    public void setNext(Level nextLevel) {
+        next = nextLevel;
     }
 
     public Level getWarpzone() {

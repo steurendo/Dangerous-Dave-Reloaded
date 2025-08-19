@@ -72,6 +72,10 @@ public class Player {
         return score;
     }
 
+    public PointD getSpeed() {
+        return new PointD(speedX, speedY);
+    }
+
     public double getSpeedX() {
         return speedX;
     }
@@ -245,8 +249,9 @@ public class Player {
         if (onJetpack) {
             jumping = false;
             falling = false;
-        } else
+        } else {
             falling = true;
+        }
         figureNumber = 0;
         jetpackToggle = false;
     }
@@ -402,7 +407,6 @@ public class Player {
                 score += entity.getScoreValue(); //IL PLAYER MUORE
                 die();
 
-                return true;
             } else {
                 if (entity.getCode() == 3) {
                     if (hasTrophy) {
@@ -422,11 +426,9 @@ public class Player {
                     if (entity.getScoreValue() != 0)
                         entity.setVisible(false);
                 }
-
-                return true;
             }
+            return true;
         }
-
         return false;
     }
 

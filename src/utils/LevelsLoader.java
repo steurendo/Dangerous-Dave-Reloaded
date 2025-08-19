@@ -202,7 +202,12 @@ public class LevelsLoader {
                 levelNumber,
                 nextLevel
         );
-        if (hasWarpzone) level.setWarpzone(createLevelsStructure(tilemap, levelNumber, 1));
+        if (hasWarpzone) {
+            Level warpzone = createLevelsStructure(tilemap, levelNumber, 1);
+            assert warpzone != null;
+            warpzone.setNext(level);
+            level.setWarpzone(warpzone);
+        }
 
         return level;
     }
