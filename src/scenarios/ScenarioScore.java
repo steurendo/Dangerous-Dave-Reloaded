@@ -10,18 +10,18 @@ public class ScenarioScore extends Scenario {
     }
 
     @Override
-    public void commands() {
+    public void commands(double deltaT) {
     }
 
     @Override
-    public void collisions() {
+    public void collisions(double deltaT) {
     }
 
     @Override
-    public void update() {
+    public void update(double deltaT) {
     }
 
     @Override
-    public void render() {
+    public void render(double deltaT) {
     }
 }

@@ -43,8 +43,8 @@ public class Shoot {
         this.direction = direction;
     }
 
-    public void update() {
-        location.x += direction * SPEED;
+    public void update(double deltaT) {
+        location.x += direction * SPEED * deltaT * 60;
     }
 
     public void reset() {

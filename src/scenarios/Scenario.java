@@ -7,11 +7,11 @@ public abstract class Scenario {
     protected Textures textures;
     protected Model model;
 
-    public abstract void commands();
+    public abstract void commands(double deltaT);
 
-    public abstract void collisions();
+    public abstract void collisions(double deltaT);
 
-    public abstract void update();
+    public abstract void update(double deltaT);
 
-    public abstract void render();
+    public abstract void render(double deltaT);
 }

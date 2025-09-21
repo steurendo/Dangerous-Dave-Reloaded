@@ -8,7 +8,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class ScenarioMenu extends Scenario {
-    private int figureNumber;
+    private double figureNumber;
     private boolean drawText;
 
     public ScenarioMenu(Model model, Textures textures) {
@@ -19,24 +19,26 @@ public class ScenarioMenu extends Scenario {
     }
 
     @Override
-    public void commands() {
+    public void commands(double deltaT) {
         if (Keyboard.isKeyDown(GLFW_KEY_SPACE))
             model.start();
     }
 
     @Override
-    public void collisions() {
+    public void collisions(double deltaT) {
     }
 
     @Override
-    public void update() {
-        figureNumber = (figureNumber + 1) % 16;
+    public void update(double deltaT) {
+        figureNumber += deltaT * 60;
+        if (figureNumber >= 16) figureNumber -= 16;
         if (figureNumber == 0)
             drawText = !drawText;
     }
 
     @Override
-    public void render() {
+    public void render(double deltaT) {
+        int figureNumber = (int) this.figureNumber;
         //LOGO
         Textures.bindTexture(textures.getTextureGameParts());
         glBegin(GL_QUADS);

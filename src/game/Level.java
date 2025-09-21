@@ -39,9 +39,16 @@ public class Level {
     }
 
     public boolean checkPureCollision(double x, double y) {
+        // Test bordo di un blocco
+        double borderX = x / 32;
+        double borderY = y / 32;
+        if (borderX == (int) borderX || borderY == (int) borderY) return false;
+        // Bordo mappa (orizzontale)
         if (x < 0 || x >= width * 32) return true;
+        // Bordo mappa (verticale)
         if (y < 0) y += TILES_ALONG_Y * 32;
         if (y >= TILES_ALONG_Y * 32) y -= TILES_ALONG_Y * 32;
+        // Controllo vero e proprio
         int mapX = (int) (x / 32);
         int mapY = (int) (y / 32);
         return map[mapX][mapY];

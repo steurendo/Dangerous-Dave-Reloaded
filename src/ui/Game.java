@@ -95,23 +95,20 @@ public class Game {
     }
 
     public void start() {
-        double t0 = glfwGetTime(), t1 = glfwGetTime(), deltaT, inc = 0;
+        double t0, t1 = glfwGetTime(), deltaT, inc = 0;
         while (active) {
             t0 = t1;
             t1 = glfwGetTime();
             deltaT = t1 - t0;
             inc += deltaT;
-            if (inc >= 1) {
-//                System.out.println("Tick " + inc);
-                inc = 0;
-            }
+            if (inc >= 1) inc -= 1;
             glfwPollEvents();
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            switchScenario[model.getState()].commands();
-            switchScenario[model.getState()].collisions();
-            switchScenario[model.getState()].update();
-            switchScenario[model.getState()].render();
+            switchScenario[model.getState()].commands(deltaT);
+            switchScenario[model.getState()].collisions(deltaT);
+            switchScenario[model.getState()].update(deltaT);
+            switchScenario[model.getState()].render(deltaT);
             glfwSwapBuffers(window);
             if (glfwWindowShouldClose(window)) {
                 active = false;

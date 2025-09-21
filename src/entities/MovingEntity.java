@@ -77,13 +77,13 @@ public class MovingEntity extends Entity {
                 Math.abs(location.y - shootLocation.y) < height / 2 + 3);
     }
 
-    public void update(PointD playerLocation) {
+    public void update(double deltaT, PointD playerLocation) {
         if (!alive && deadCounter >= 0)
             deadCounter--;
         if (deadCounter == 0)
             visible = false;
         if (shoot.isVisible())
-            shoot.update();
+            shoot.update(deltaT);
         if (alive) {
             if (Math.abs(shoot.getX() - location.x) > 400)
                 shoot.setDirection(0);

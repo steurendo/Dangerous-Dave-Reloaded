@@ -9,12 +9,12 @@ import static game.Level.TILES_ALONG_Y;
 public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
-    public final static double SPEED_FAST = 2;
-    public final static double JUMP_POWER = -4;
-    public final static double JUMP_SPEED_X = 2;
+    public final static double BOX_HEIGHT = 26;
+    public final static double SPEED_FAST = 2.1;
+    public final static double JUMP_POWER = -3.2;
     public final static int JUMP_COOLDOWN = 5;
     public final static double SPEED_SLOW = 1.8;
-    public final static double GRAVITY = 0.1177;
+    public final static double GRAVITY = 0.096;
     public final static double GRAVITY_MAX = 2;
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
@@ -43,7 +43,7 @@ public class Player {
     private boolean passedLevel;
     private int constantFigureNumber;
     private int maxFigureNumber;
-    private int figureNumber;
+    private double figureNumber;
     private int deadCounter;
 
     public Player() {
@@ -88,6 +88,11 @@ public class Player {
 
     public PointD getSpeed() {
         return new PointD(speedX, speedY);
+    }
+
+    public void normalizeSpeed() {
+        speedX *= 0.707;
+        speedY *= 0.707;
     }
 
     public double getSpeedX() {
@@ -150,16 +155,8 @@ public class Player {
         return hasTrophy;
     }
 
-    public int getPureFigureNumber() {
-        return figureNumber;
-    }
-
     public int getFigureNumber() {
-        return (figureNumber / FIGURE_SPEED) + constantFigureNumber;
-    }
-
-    public int getMaxFigureNumber() {
-        return maxFigureNumber;
+        return (int) (figureNumber / FIGURE_SPEED) + constantFigureNumber;
     }
 
     public int getDeadCounter() {
@@ -181,17 +178,14 @@ public class Player {
         this.score += score;
     }
 
-    public void setJumpCooldown(int jumpCooldown) {
-        this.jumpCooldown = jumpCooldown;
-    }
-
-    public void setFigureNumber(int figureNumber) {
-        this.figureNumber = figureNumber;
-    }
+//    public void setJumpCooldown(int jumpCooldown) {
+//        this.jumpCooldown = jumpCooldown;
+//    }
 
     public void setIfIsJumping(boolean jumping) {
         if (jumping != this.jumping) {
             this.jumping = jumping;
+            jumpCooldown = JUMP_COOLDOWN;
             figureNumber = 0;
         }
     }
@@ -354,9 +348,9 @@ public class Player {
         deadCounter = -1;
     }
 
-    public void update() {
+    public void update(double deltaT) {
         if (shoot.isVisible())
-            shoot.update();
+            shoot.update(deltaT);
         if (Math.abs(shoot.getX() - location.x) > 400)
             shoot.setDirection(0);
         if (!alive && deadCounter >= 0)
@@ -399,9 +393,14 @@ public class Player {
         alive = false;
     }
 
-    public void updateFigureNumber() {
-        if (onJetpack || speedX != 0 || climbing && (speedX != 0 || speedY != 0))
-            figureNumber = (figureNumber + 1) % (maxFigureNumber * Player.FIGURE_SPEED);
+    public void updateFigureNumber(double deltaT) {
+        boolean isWalking = speedX != 0;
+        boolean isClimbing = climbing && (speedX != 0 || speedY != 0);
+        if (onJetpack || isWalking || isClimbing) {
+            figureNumber += deltaT * 60;
+            if (figureNumber >= maxFigureNumber * Player.FIGURE_SPEED)
+                figureNumber -= maxFigureNumber * Player.FIGURE_SPEED;
+        }
     }
 
     public boolean checkCollisionWithEntity(Entity entity) {

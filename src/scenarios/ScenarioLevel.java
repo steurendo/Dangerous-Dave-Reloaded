@@ -4,12 +4,11 @@ import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
-import utils.Functions;
+import static utils.Functions.*;
 import utils.PointD;
 import utils.Textures;
 
 import java.awt.*;
-import java.util.Arrays;
 
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,7 +19,7 @@ public class ScenarioLevel extends Scenario {
     private final static int MAX_FIGURE_NUMBER = 300;
 
     private final Player player;
-    private int figureNumber;
+    private double figureNumber;
     private boolean paused;
     private boolean pauseTrigger;
 
@@ -32,11 +31,12 @@ public class ScenarioLevel extends Scenario {
         figureNumber = 0;
         paused = false;
         pauseTrigger = true;
+        player.rechargeJetpack();
     }
 
 
     @Override
-    public void commands() {
+    public void commands(double deltaT) {
         // Pausa (P)
         if (Keyboard.isKeyDown(GLFW_KEY_P)) {
             if (pauseTrigger) {
@@ -47,7 +47,7 @@ public class ScenarioLevel extends Scenario {
             pauseTrigger = true;
         if (paused) return;
 
-        player.update();
+//        player.update(deltaT);
 
         // Se il player sta morendo, non vengono processati comandi
         if (!player.isAlive()) return;
@@ -75,11 +75,12 @@ public class ScenarioLevel extends Scenario {
             else
                 player.setDirectionY(directionY);
             if (player.isOnJetpack() || player.isClimbing()) {
-                player.setSpeedY(Player.SPEED_FAST * directionY);
+                player.setSpeedY(Player.SPEED_FAST * directionY * deltaT * 60);
             } else if (directionY == Directions.UP) {
                 if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
                     player.setSpeedY(Player.JUMP_POWER);
-                    player.setJumpCooldown(Player.JUMP_COOLDOWN);
+                    player.setIfIsJumping(true);
+//                    player.setJumpCooldown(Player.JUMP_COOLDOWN);
                 }
             }
         }
@@ -97,22 +98,31 @@ public class ScenarioLevel extends Scenario {
                 player.setDirectionX(directionX);
 
             if (player.isClimbing() || player.isOnJetpack())
-                player.setSpeedX(Player.SPEED_FAST * directionX);
+                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
             else if (player.isJumping() || player.isFalling())
-                player.setSpeedX(Player.JUMP_SPEED_X * directionX);
+                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
             else
-                player.setSpeedX(Player.SPEED_SLOW * directionX);
+                player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
             //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
+        }
+
+        // Normalizzazione velocità su jetpack o arrampicando
+        if (player.isOnJetpack() || player.isClimbing()) {
+            PointD speed = player.getSpeed();
+            if (speed.x != 0 && speed.y != 0) player.normalizeSpeed();
         }
 
         // Gravità
         if (!player.isOnJetpack() && !player.isClimbing()) {
-            player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX));
+            if (player.getSpeedY() == 0)
+                player.setSpeedY(Player.GRAVITY_MAX * deltaT * 60);
+            else
+                player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY * deltaT * 60, Player.GRAVITY_MAX * deltaT * 60));
         }
     }
 
     @Override
-    public void collisions() {
+    public void collisions(double deltaT) {
         if (!player.isAlive() || paused) return;
 
         // Controllo che il giocatore non stia andando in una warpzone
@@ -141,15 +151,20 @@ public class ScenarioLevel extends Scenario {
         for (PointD corner : corners) {
             // Collisione lungo y
             if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
-                if (player.isJumping())
+                if (player.isJumping() || player.isClimbing()) {
                     speed.y = Player.GRAVITY_MAX;
+                }
                 else {
-                    player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
+                    if (player.isOnJetpack())
+                        player.setY(Math.round((corner.y + speed.y) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
+                    else {
+                        player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
+                    }
                     speed.y = 0;
                 }
             }
             // Collisione lungo x
-            if (level.checkPureCollision(corner.x + speed.x, corner.y - 0.00000000001)) {
+            if (level.checkPureCollision(corner.x + speed.x, corner.y)) {
                 speed.x = 0;
             }
         }
@@ -198,10 +213,11 @@ public class ScenarioLevel extends Scenario {
     }
 
     @Override
-    public void update() {
+    public void update(double deltaT) {
         if (paused) return;
-        player.updateFigureNumber();
-        figureNumber = (figureNumber + 1) % MAX_FIGURE_NUMBER;
+        player.updateFigureNumber(deltaT);
+        figureNumber += deltaT * 60;
+        if (figureNumber >= MAX_FIGURE_NUMBER) figureNumber -= MAX_FIGURE_NUMBER;
 
         if (!player.isAlive()) {
             if (player.getDeadCounter() == 0) {
@@ -216,9 +232,9 @@ public class ScenarioLevel extends Scenario {
             }
         }
 
-        player.update();
+        player.update(deltaT);
         for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
-            entity.update(player.getLocation());
+            entity.update(deltaT, player.getLocation());
 
         //SPARO
         if (player.getShoot().isVisible())
@@ -249,11 +265,12 @@ public class ScenarioLevel extends Scenario {
     }
 
     @Override
-    public void render() {
+    public void render(double deltaT) {
         int i;
         double viewport;
         PointD playerLocation;
         int levelWidth;
+        int figureNumber = (int) this.figureNumber;
 
         levelWidth = model.getCurrentLevel().getWidth() * 32;
         playerLocation = player.getLocation();
@@ -535,6 +552,7 @@ public class ScenarioLevel extends Scenario {
             Entity currentEntity;
             int textureNumber;
             double limitYTexture, limitY;
+            int figureNumber = (int) this.figureNumber;
 
             currentEntity = entities.getEntity();
             if (currentEntity.isVisible()) {
