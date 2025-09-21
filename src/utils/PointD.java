@@ -29,7 +29,11 @@ public class PointD {
         return new PointD(x, y);
     }
 
+    public PointD plus(double x, double y) {
+        return new PointD(this.x + x, this.y + y);
+    }
+
     public PointD plus(PointD point) {
-        return new PointD(x + point.x, y + point.y);
+        return plus(point.x, point.y);
     }
 }

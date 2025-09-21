@@ -4,6 +4,7 @@ import entities.Entity;
 import entities.EntityChain;
 import entities.MovingEntity;
 import entities.Player;
+import utils.Functions;
 import utils.PointD;
 
 import java.awt.*;
@@ -50,49 +51,6 @@ public class Level {
         return checkPureCollision(point.x, point.y);
     }
 
-    public int checkCollisionX(double x, double y) {
-        int coordXRight, coordXLeft, coordYDown, coordYUp;
-
-        coordXLeft = (int) ((x > (int) x ? Math.ceil(x) : x) + (Player.WIDTH / 2 - 1)) / 32;
-        coordXRight = (int) (x - Player.WIDTH / 2) / 32;
-        coordYDown = (int) (y + (Player.HEIGHT / 2 - 1)) / 32;
-        if (coordYDown == TILES_ALONG_Y) coordYDown = 0;
-        coordYUp = (int) (y - Player.HEIGHT / 2) / 32;
-        if (coordYUp < 0) coordYUp = TILES_ALONG_Y - 1;
-        if (map[coordXLeft][coordYDown] || map[coordXLeft][coordYUp])
-            return 1;
-        if (map[coordXRight][coordYDown] || map[coordXRight][coordYUp])
-            return -1;
-
-        return 0;
-    }
-
-    public int checkCollisionX(PointD location) {
-        return checkCollisionX(location.x, location.y);
-    }
-
-    public int checkCollisionY(double x, double y) {
-        int coordXRight, coordXLeft, coordYUpDown, coordYUp;
-
-        coordXLeft = (int) (x + (Player.WIDTH / 2 - 1)) / 32;
-        coordXRight = (int) (x - Player.WIDTH / 2) / 32;
-        coordYUpDown = (int) ((y > (int) y ? Math.ceil(y) : y) + (Player.HEIGHT / 2 - 1)) / 32;
-        if (coordYUpDown == TILES_ALONG_Y) coordYUpDown = 0;
-        coordYUp = (int) (y - Player.HEIGHT / 2) / 32;
-        if (coordYUp < 0) coordYUp = TILES_ALONG_Y - 1;
-        if (map[coordXLeft][coordYUpDown] || map[coordXRight][coordYUpDown])
-            return 1;
-        if (map[coordXLeft][coordYUp] || map[coordXRight][coordYUp])
-            return -1;
-
-        return 0;
-    }
-
-    public int checkCollisionY(PointD location) {
-        return checkCollisionY(location.x, location.y);
-    }
-
-    //public boolean checkCollision(int x, int y) { return checkCollision(new Point(x, y)); }
     public int getWidth() {
         return width;
     }

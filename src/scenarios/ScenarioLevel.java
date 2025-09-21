@@ -4,15 +4,18 @@ import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
+import utils.Functions;
 import utils.PointD;
 import utils.Textures;
+
+import java.awt.*;
+import java.util.Arrays;
 
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class ScenarioLevel extends Scenario {
-    public static final double TILES_W = 32d;
     private final static int FIGURE_SPEED = 5;
     private final static int MAX_FIGURE_NUMBER = 300;
 
@@ -25,6 +28,7 @@ public class ScenarioLevel extends Scenario {
         this.model = model;
         this.textures = textures;
         player = model.getPlayer();
+        player.setY(player.getY() - 0.001);
         figureNumber = 0;
         paused = false;
         pauseTrigger = true;
@@ -71,8 +75,7 @@ public class ScenarioLevel extends Scenario {
             else
                 player.setDirectionY(directionY);
             if (player.isOnJetpack() || player.isClimbing()) {
-                if (model.getCurrentLevel().checkCollisionY(player.getX(), player.getY() + Player.SPEED_FAST * directionY) == 0)
-                    player.setSpeedY(Player.SPEED_FAST * directionY);
+                player.setSpeedY(Player.SPEED_FAST * directionY);
             } else if (directionY == Directions.UP) {
                 if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
                     player.setSpeedY(Player.JUMP_POWER);
@@ -93,16 +96,18 @@ public class ScenarioLevel extends Scenario {
             else
                 player.setDirectionX(directionX);
 
-            // Collisioni con blocchi fissi
-            if (model.getCurrentLevel().checkCollisionX(player.getX() + (player.isClimbing() || player.isOnJetpack() ? Player.SPEED_FAST : Player.SPEED_SLOW) * directionX, player.getY()) == 0) {
-                if (player.isClimbing() || player.isOnJetpack())
-                    player.setSpeedX(Player.SPEED_FAST * directionX);
-                else if (player.isJumping() || player.isFalling())
-                    player.setSpeedX(Player.JUMP_SPEED_X * directionX);
-                else
-                    player.setSpeedX(Player.SPEED_SLOW * directionX);
-                //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
-            }
+            if (player.isClimbing() || player.isOnJetpack())
+                player.setSpeedX(Player.SPEED_FAST * directionX);
+            else if (player.isJumping() || player.isFalling())
+                player.setSpeedX(Player.JUMP_SPEED_X * directionX);
+            else
+                player.setSpeedX(Player.SPEED_SLOW * directionX);
+            //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
+        }
+
+        // Gravità
+        if (!player.isOnJetpack() && !player.isClimbing()) {
+            player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX));
         }
     }
 
@@ -113,6 +118,7 @@ public class ScenarioLevel extends Scenario {
         // Controllo che il giocatore non stia andando in una warpzone
         warpzoneCheck();
         // Verifico collisioni
+        collisionsWithWorld();
         collisionsWithEntities();
         collisionsWithMovingEntities();
     }
@@ -120,27 +126,50 @@ public class ScenarioLevel extends Scenario {
     private void warpzoneCheck() {
         Level currentLevel = model.getCurrentLevel();
         double playerX = player.getX() + player.getSpeedX();
-        boolean playerTouchingLeftBorder = (playerX - Player.WIDTH / 2) / TILES_W < 0;
-        boolean playerTouchingRightBorder = (playerX + Player.WIDTH / 2) / TILES_W >= currentLevel.getWidth();
+        boolean playerTouchingLeftBorder = (playerX - Player.WIDTH / 2) / 32 < 0;
+        boolean playerTouchingRightBorder = (playerX + Player.WIDTH / 2) / 32 >= currentLevel.getWidth();
         if (playerTouchingLeftBorder || playerTouchingRightBorder) {
             if (currentLevel.hasWarpzone()) model.nextWarpzone();
         }
+    }
+
+    private void collisionsWithWorld() {
+        Level level = model.getCurrentLevel();
+        PointD speed = player.getSpeed();
+        PointD[] corners = player.getCorners();
+
+        for (PointD corner : corners) {
+            // Collisione lungo y
+            if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
+                if (player.isJumping())
+                    speed.y = Player.GRAVITY_MAX;
+                else {
+                    player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
+                    speed.y = 0;
+                }
+            }
+            // Collisione lungo x
+            if (level.checkPureCollision(corner.x + speed.x, corner.y - 0.00000000001)) {
+                speed.x = 0;
+            }
+        }
+        player.setSpeed(speed);
     }
 
     private void collisionsWithEntities() {
         Level currentLevel = model.getCurrentLevel();
 
         Entity entity;
-        // COLLISIONE CON ENTITà (x, y + 1)
+        // Collisione con entità (x, y + 1)
         entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
         if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // COLLISIONE CON ENTITà (x + 1, y)
+        // Collisione con entità (x + 1, y)
         entity = currentLevel.getEntity((int) player.getX() / 32 + 1, (int) player.getY() / 32);
         if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // COLLISIONE CON ENTITà (x, y - 1)
+        // Collisione con entità (x, y - 1)
         entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 - 1);
         if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // COLLISIONE CON ENTITà (x - 1, y)
+        // Collisione con entità (x - 1, y)
         entity = currentLevel.getEntity((int) player.getX() / 32 - 1, (int) player.getY() / 32);
         if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
     }
@@ -196,20 +225,6 @@ public class ScenarioLevel extends Scenario {
             if (model.getCurrentLevel().checkPureCollision(player.getShoot().getX() + player.getShoot().getDirection() * 8, player.getShoot().getY()))
                 player.getShoot().setDirection(0);
         if (player.isAlive()) {
-            //GRAVITA'
-            if (!player.isOnJetpack() && !player.isClimbing()) {
-                PointD speed = new PointD(player.getSpeedX(), Math.min(player.getSpeedY() + Player.GRAVITY, Player.GRAVITY_MAX));
-                if (player.isFalling() && model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == Directions.DOWN) {
-                    player.setY(player.getY() + (32 - (player.getY() % 32 + Player.HEIGHT / 2)) % 32);
-                    player.setSpeedY(0);
-                    player.setDirectionX(0);
-                }
-                if (player.isJumping() && model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == Directions.UP) {
-                    player.setSpeedY(Player.GRAVITY_MAX);
-                }
-                if (model.getCurrentLevel().checkCollisionY(player.getX() + speed.x, player.getY() + speed.y) == 0)
-                    player.setSpeedY(speed.y);
-            }
             //SPOSTAMENTO ORIZZONTALE
             if (player.getSpeedX() != 0) {
                 player.moveX();
