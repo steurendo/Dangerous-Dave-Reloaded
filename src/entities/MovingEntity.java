@@ -2,20 +2,16 @@ package entities;
 
 import utils.PointD;
 
-import java.util.*;
-
 public class MovingEntity extends Entity {
     public final static int DEAD_COUNTER = 150;
-    public final static int FIGURE_SPEED = 5;
-    public final static int SHOOT_SPEED = 5;
     private final static int SHOOT_RELOAD = 200;
 
     private final PointD baseLocation;
     private final Shoot shoot;
     private double movingNumber;
     private boolean alive;
-    private int deadCounter;
-    private int shootReload;
+    private double deadCounter;
+    private double shootReload;
 
     public MovingEntity(int texture, int code, int figuresNumber, PointD location, double width, double height, int scoreValue, boolean mortal) {
         super(texture, code, figuresNumber, location, width, height, scoreValue, mortal);
@@ -44,7 +40,7 @@ public class MovingEntity extends Entity {
         textureHeight = 304;
         movingNumber = 0;
         alive = true;
-        deadCounter = -1;
+        deadCounter = DEAD_COUNTER;
         shoot = new Shoot();
         shootReload = 0;
     }
@@ -60,12 +56,12 @@ public class MovingEntity extends Entity {
     public void init() {
         visible = true;
         alive = true;
-        deadCounter = -1;
+        deadCounter = DEAD_COUNTER;
         location = baseLocation.clone();
     }
 
     public void die() {
-        deadCounter = DEAD_COUNTER;
+//        deadCounter = DEAD_COUNTER;
         alive = false;
     }
 
@@ -79,8 +75,8 @@ public class MovingEntity extends Entity {
 
     public void update(double deltaT, PointD playerLocation) {
         if (!alive && deadCounter >= 0)
-            deadCounter--;
-        if (deadCounter == 0)
+            deadCounter -= deltaT * 60;
+        if (deadCounter <= 0)
             visible = false;
         if (shoot.isVisible())
             shoot.update(deltaT);
@@ -88,40 +84,43 @@ public class MovingEntity extends Entity {
             if (Math.abs(shoot.getX() - location.x) > 400)
                 shoot.setDirection(0);
             if (shootReload > 0)
-                shootReload--;
-            if (shootReload == 0) {
+                shootReload -= deltaT * 60;
+            if (shootReload <= 0) {
                 int direction = location.x > playerLocation.x ? Directions.LEFT : Directions.RIGHT;
                 shoot.setLocation(new PointD(location.x + (width / 2 * direction), location.y));
                 shoot.setDirection(direction);
                 shootReload = SHOOT_RELOAD;
             }
+
+            PointD delta = new PointD();
             if (code == 0) {
-                location.x += Math.cos(movingNumber * 1.8) * 4;
-                location.y += Math.sin(movingNumber * 10) * 2;
+                delta.x += Math.cos(movingNumber * 1.8) * 4;
+                delta.y += Math.sin(movingNumber * 10) * 2;
             } else if (code == 1) {
-                location.x -= Math.sin(movingNumber * 2) * 2.6;
-                location.y += Math.cos(movingNumber * 2) * 0.8;
+                delta.x -= Math.sin(movingNumber * 2) * 2.6;
+                delta.y += Math.cos(movingNumber * 2) * 0.8;
             } else if (code == 2) {
-                location.x -= Math.cos(movingNumber * 4) * 2;
-                location.y += Math.sin(movingNumber * 4) * 2;
-                location.x -= Math.cos(movingNumber * 15) * 1;
-                location.y += Math.sin(movingNumber * 15) * 1;
+                delta.x -= Math.cos(movingNumber * 4) * 2;
+                delta.y += Math.sin(movingNumber * 4) * 2;
+                delta.x -= Math.cos(movingNumber * 15) * 1;
+                delta.y += Math.sin(movingNumber * 15) * 1;
             } else if (code == 3)
-                location.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
+                delta.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
             else if (code == 4) {
-                location.x += Math.cos(movingNumber * 4) * 1.4;
-                location.y += Math.sin(movingNumber * 4) * 3.4;
+                delta.x += Math.cos(movingNumber * 4) * 1.4;
+                delta.y += Math.sin(movingNumber * 4) * 3.4;
             } else if (code == 5) {
-                location.x -= Math.cos(movingNumber * 4) * 2;
-                location.y += Math.sin(movingNumber * 4) * 2;
-                location.x -= Math.cos(movingNumber * 15) * 1;
-                location.y -= Math.sin(movingNumber * 15) * 1;
+                delta.x -= Math.cos(movingNumber * 4) * 2;
+                delta.y += Math.sin(movingNumber * 4) * 2;
+                delta.x -= Math.cos(movingNumber * 15) * 1;
+                delta.y -= Math.sin(movingNumber * 15) * 1;
             } else if (code == 6) {
-                location.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
-                location.y += Math.sin(movingNumber * 60) * 2;
+                delta.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
+                delta.y += Math.sin(movingNumber * 60) * 2;
             } else if (code == 7)
-                location.x += Math.cos(movingNumber * 4) * 4;
-            movingNumber = (movingNumber + 0.01) % 360;
+                delta.x += Math.cos(movingNumber * 4) * 4;
+            location = location.plus(delta.scale(deltaT * 60));
+            movingNumber = (movingNumber + 0.01 * deltaT * 60) % 360;
         }
     }
 }

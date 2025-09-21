@@ -36,4 +36,8 @@ public class PointD {
     public PointD plus(PointD point) {
         return plus(point.x, point.y);
     }
+
+    public PointD scale(double factor) {
+        return new PointD(x * factor, y * factor);
+    }
 }

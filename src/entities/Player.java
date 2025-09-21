@@ -10,11 +10,11 @@ public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
     public final static double BOX_HEIGHT = 26;
-    public final static double SPEED_FAST = 2.1;
-    public final static double JUMP_POWER = -3.2;
+    public final static double SPEED_FAST = 2;
+    public final static double JUMP_POWER = -2.83;
     public final static int JUMP_COOLDOWN = 5;
-    public final static double SPEED_SLOW = 1.8;
-    public final static double GRAVITY = 0.096;
+    public final static double SPEED_SLOW = 1.7;
+    public final static double GRAVITY = 0.075;
     public final static double GRAVITY_MAX = 2;
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
@@ -37,14 +37,14 @@ public class Player {
     private int jumpCooldown;
     private boolean falling;
     private boolean climbing;
-    private Shoot shoot;
+    private final Shoot shoot;
     private boolean hasGun;
     private boolean hasTrophy;
     private boolean passedLevel;
     private int constantFigureNumber;
     private int maxFigureNumber;
     private double figureNumber;
-    private int deadCounter;
+    private double deadCounter;
 
     public Player() {
         figureNumber = 0;
@@ -58,8 +58,8 @@ public class Player {
 
     public PointD[] getCorners() {
         return new PointD[]{
-                new PointD(location.x - WIDTH / 2, location.y - HEIGHT / 2), // TOP-LEFT
-                new PointD(location.x + WIDTH / 2, location.y - HEIGHT / 2), // TOP-RIGHT
+                new PointD(location.x - WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-LEFT
+                new PointD(location.x + WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-RIGHT
                 new PointD(location.x - WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-LEFT
                 new PointD(location.x + WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-RIGHT
         };
@@ -90,10 +90,10 @@ public class Player {
         return new PointD(speedX, speedY);
     }
 
-    public void normalizeSpeed() {
-        speedX *= 0.707;
-        speedY *= 0.707;
-    }
+//    public void normalizeSpeed() {
+//        speedX *= 0.707;
+//        speedY *= 0.707;
+//    }
 
     public double getSpeedX() {
         return speedX;
@@ -159,7 +159,7 @@ public class Player {
         return (int) (figureNumber / FIGURE_SPEED) + constantFigureNumber;
     }
 
-    public int getDeadCounter() {
+    public double getDeadCounter() {
         return deadCounter;
     }
 
@@ -300,7 +300,7 @@ public class Player {
         constantFigureNumber = 0;
         maxFigureNumber = 1;
         figureNumber = 0;
-        deadCounter = -1;
+        deadCounter = DEAD_COUNTER;
     }
 
     //FUNZIONE UTILIZZATA PER RIPARTIRE IN UN LIVELLO
@@ -322,7 +322,7 @@ public class Player {
         constantFigureNumber = 0;
         maxFigureNumber = 1;
         figureNumber = 0;
-        deadCounter = -1;
+        deadCounter = DEAD_COUNTER;
     }
 
     //FUNZIONE UTILIZZATA AL PASSAGGIO DA LIVELLO
@@ -345,7 +345,7 @@ public class Player {
         constantFigureNumber = 0;
         maxFigureNumber = 1;
         figureNumber = 0;
-        deadCounter = -1;
+        deadCounter = DEAD_COUNTER;
     }
 
     public void update(double deltaT) {
@@ -354,10 +354,10 @@ public class Player {
         if (Math.abs(shoot.getX() - location.x) > 400)
             shoot.setDirection(0);
         if (!alive && deadCounter >= 0)
-            deadCounter--;
+            deadCounter -= deltaT * 60;
         if (onJetpack) {
             if (alive)
-                jetpackValue -= 0.1;
+                jetpackValue -= 0.1 * deltaT * 60;
             if (jetpackValue <= 0)
                 triggerJetpackToggle();
         }
@@ -389,7 +389,6 @@ public class Player {
     }
 
     public void die() {
-        deadCounter = DEAD_COUNTER;
         alive = false;
     }
 

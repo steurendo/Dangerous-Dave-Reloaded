@@ -4,11 +4,8 @@ import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
-import static utils.Functions.*;
 import utils.PointD;
 import utils.Textures;
-
-import java.awt.*;
 
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.glfw.GLFW.*;
@@ -31,7 +28,6 @@ public class ScenarioLevel extends Scenario {
         figureNumber = 0;
         paused = false;
         pauseTrigger = true;
-        player.rechargeJetpack();
     }
 
 
@@ -46,8 +42,6 @@ public class ScenarioLevel extends Scenario {
         } else
             pauseTrigger = true;
         if (paused) return;
-
-//        player.update(deltaT);
 
         // Se il player sta morendo, non vengono processati comandi
         if (!player.isAlive()) return;
@@ -80,7 +74,6 @@ public class ScenarioLevel extends Scenario {
                 if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
                     player.setSpeedY(Player.JUMP_POWER);
                     player.setIfIsJumping(true);
-//                    player.setJumpCooldown(Player.JUMP_COOLDOWN);
                 }
             }
         }
@@ -103,14 +96,13 @@ public class ScenarioLevel extends Scenario {
                 player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
             else
                 player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
-            //player.setSpeedX((player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling() ? entities.Player.SPEED_FAST : entities.Player.SPEED_SLOW) * directionX);
         }
 
-        // Normalizzazione velocità su jetpack o arrampicando
-        if (player.isOnJetpack() || player.isClimbing()) {
-            PointD speed = player.getSpeed();
-            if (speed.x != 0 && speed.y != 0) player.normalizeSpeed();
-        }
+//        // Normalizzazione velocità su jetpack o arrampicando
+//        if (player.isOnJetpack() || player.isClimbing()) {
+//            PointD speed = player.getSpeed();
+//            if (speed.x != 0 && speed.y != 0) player.normalizeSpeed();
+//        }
 
         // Gravità
         if (!player.isOnJetpack() && !player.isClimbing()) {
@@ -153,8 +145,7 @@ public class ScenarioLevel extends Scenario {
             if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
                 if (player.isJumping() || player.isClimbing()) {
                     speed.y = Player.GRAVITY_MAX;
-                }
-                else {
+                } else {
                     if (player.isOnJetpack())
                         player.setY(Math.round((corner.y + speed.y) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
                     else {
@@ -220,7 +211,7 @@ public class ScenarioLevel extends Scenario {
         if (figureNumber >= MAX_FIGURE_NUMBER) figureNumber -= MAX_FIGURE_NUMBER;
 
         if (!player.isAlive()) {
-            if (player.getDeadCounter() == 0) {
+            if (player.getDeadCounter() <= 0) {
                 if (player.getLives() > 0) {
                     PointD spawnpoint = new PointD(
                             model.getCurrentLevel().getSpawnpoint().x * 32 + 16,

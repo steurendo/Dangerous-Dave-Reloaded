@@ -4,19 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Better collisions">
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Way better collisions">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/entities/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/MovingEntity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Shoot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Shoot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/game/Level.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Level.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/Scenario.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/Scenario.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioScore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioScore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioTransition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioTransition.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ui/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/Functions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/Functions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/PointD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/PointD.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,7 +179,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758450330376</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Way better collisions">
+      <option name="closed" value="true" />
+      <created>1758460417596</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1758460417596</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -211,6 +213,7 @@
     <MESSAGE value="Implemented warpzones" />
     <MESSAGE value="Slightly cleaner" />
     <MESSAGE value="Better collisions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Better collisions" />
+    <MESSAGE value="Way better collisions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Way better collisions" />
   </component>
 </project>
