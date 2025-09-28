@@ -2,7 +2,7 @@ package ui;
 
 import org.lwjgl.glfw.GLFWKeyCallback;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 public class Keyboard extends GLFWKeyCallback {
     public static boolean[] keys = new boolean[65536];

@@ -10,12 +10,12 @@ public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
     public final static double BOX_HEIGHT = 26;
-    public final static double SPEED_FAST = 2;
-    public final static double JUMP_POWER = -2.83;
+    public final static double SPEED_FAST = 1.9;
+    public final static double JUMP_POWER = -2.72;
     public final static int JUMP_COOLDOWN = 5;
     public final static double SPEED_SLOW = 1.7;
-    public final static double GRAVITY = 0.075;
-    public final static double GRAVITY_MAX = 2;
+    public final static double GRAVITY = 0.07;
+    public final static double GRAVITY_MAX = 1.9;
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
     public final static int RIGHT = 1;
@@ -32,7 +32,7 @@ public class Player {
     private int directionX;
     private int directionY;
     private boolean onJetpack;
-    private boolean jetpackToggle;
+    private boolean jetpackUnlocked;
     private boolean jumping;
     private int jumpCooldown;
     private boolean falling;
@@ -118,8 +118,8 @@ public class Player {
         return onJetpack;
     }
 
-    public boolean getJetpackToggle() {
-        return jetpackToggle;
+    public boolean isJetpackUnlocked() {
+        return jetpackUnlocked;
     }
 
     public boolean isJumping() {
@@ -227,12 +227,12 @@ public class Player {
         if (location.y >= TILES_ALONG_Y * 32) location.y -= TILES_ALONG_Y * 32;
     }
 
-    //RICARICA IL VALORE DEL JETPACK
+    // Ricarica il jetpack
     public void rechargeJetpack() {
         jetpackValue = 60;
     }
 
-    //MODIFICA LO STATO DEL GIOCATORE, SE VIVO O MORTO
+    // Modifica lo stato (vivo/morto) del giocatore
     public void setAlive(boolean alive) {
         this.alive = alive;
         if (!alive) {
@@ -241,14 +241,14 @@ public class Player {
         }
     }
 
-    //SBLOCCA LA POSSIBILIT� DI ATTIVARE IL JETPACK
-    public void jetpackToggleUnlock() {
-        jetpackToggle = true;
+    // Sblocca la possibilità di usare il jetpack
+    public void unlockJetpack() {
+        jetpackUnlocked = true;
     }
 
-    //ATTIVA O DISATTIVA IL JETPACK
+    // Attiva o disattiva il jetpack
     public void triggerJetpackToggle() {
-        onJetpack = !onJetpack;
+        onJetpack = !onJetpack && jetpackValue > 0;
         if (onJetpack) {
             jumping = false;
             falling = false;
@@ -256,10 +256,10 @@ public class Player {
             falling = true;
         }
         figureNumber = 0;
-        jetpackToggle = false;
+        jetpackUnlocked = false;
     }
 
-    //MOTIFICA LA DIREZIONE DEL GIOCATORE
+    // Modifica la direzione del giocatore
     public void setDirectionX(int directionX) {
         if (this.directionX != directionX) {
             this.directionX = directionX;
@@ -283,7 +283,7 @@ public class Player {
         directionX = 0;
         directionY = 0;
         onJetpack = false;
-        jetpackToggle = true;
+        jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
         falling = false;
@@ -307,7 +307,7 @@ public class Player {
         speedX = SPEED_SLOW;
         speedY = 0;
         onJetpack = false;
-        jetpackToggle = true;
+        jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
         falling = false;
@@ -328,7 +328,7 @@ public class Player {
         speedX = SPEED_SLOW;
         speedY = 0;
         onJetpack = false;
-        jetpackToggle = true;
+        jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
         falling = false;

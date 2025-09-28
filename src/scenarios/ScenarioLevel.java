@@ -4,7 +4,6 @@ import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
-import utils.Functions;
 import utils.PointD;
 import utils.Textures;
 
@@ -53,10 +52,8 @@ public class ScenarioLevel extends Scenario {
 
         // Jetpack (Shift)
         if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
-            if (player.getJetpackValue() > 0 && player.getJetpackToggle()) {
-                player.triggerJetpackToggle();
-            }
-        } else if (!player.getJetpackToggle()) player.jetpackToggleUnlock();
+            if (player.isJetpackUnlocked()) player.triggerJetpackToggle();
+        } else if (!player.isJetpackUnlocked()) player.unlockJetpack();
 
         // Arrampicata
         if (Keyboard.isKeyDown(GLFW_KEY_UP) ||
@@ -155,10 +152,10 @@ public class ScenarioLevel extends Scenario {
         for (PointD corner : corners) {
             // Collisione lungo y
             if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
-                if (player.isJumping() || player.isClimbing()) {
+                if (player.isJumping()) {
                     speed.y = Player.GRAVITY_MAX;
                 } else {
-                    if (player.isOnJetpack())
+                    if (player.isOnJetpack() || player.isClimbing())
                         player.setY(Math.round((corner.y + speed.y) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
                     else {
                         player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
