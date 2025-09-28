@@ -3,7 +3,6 @@ package game;
 import entities.Entity;
 import entities.EntityChain;
 import entities.MovingEntity;
-import entities.Player;
 import utils.Functions;
 import utils.PointD;
 
@@ -15,6 +14,7 @@ public class Level {
     public final static int OFFSET_Y = 2;
 
     private final boolean[][] map;
+    private final boolean[][] climbables;
     private final int width;
     private final Point spawnpoint;
     private final EntityChain[] entities;
@@ -25,8 +25,9 @@ public class Level {
     private Level next;
     private Level warpzone;
 
-    public Level(boolean[][] map, int width, Point spawnpoint, EntityChain[] entities, ArrayList<MovingEntity> movingEntities, Entity[][] entitiesMap, int texture, int number, Level next) {
+    public Level(boolean[][] map, boolean[][] climbables, int width, Point spawnpoint, EntityChain[] entities, ArrayList<MovingEntity> movingEntities, Entity[][] entitiesMap, int texture, int number, Level next) {
         this.map = map;
+        this.climbables = climbables;
         this.width = width;
         this.spawnpoint = spawnpoint;
         this.entities = entities;
@@ -56,6 +57,25 @@ public class Level {
 
     public boolean checkPureCollision(PointD point) {
         return checkPureCollision(point.x, point.y);
+    }
+
+    public boolean checkIfClimbable(double x, double y) {
+        // Test bordo di un blocco
+        double borderX = x / 32;
+        double borderY = y / 32;
+        if (borderX == (int) borderX || borderY == (int) borderY) return false;
+        // Bordo mappa (orizzontale)
+        if (x < 0 || x >= width * 32) return false;
+        // Bordo mappa (verticale)
+        if (y < 0) y += TILES_ALONG_Y * 32;
+        if (y >= TILES_ALONG_Y * 32) y -= TILES_ALONG_Y * 32;
+        // Controllo vero e proprio
+        int mapX = (int) (x / 32);
+        int mapY = (int) (y / 32);
+        return climbables[mapX][mapY];
+    }
+    public boolean checkIfClimbable(PointD point) {
+        return checkIfClimbable(point.x, point.y);
     }
 
     public int getWidth() {

@@ -1,22 +1,25 @@
 package entities;
 
+import utils.Functions;
 import utils.PointD;
+
+import java.awt.*;
 
 public class MovingEntity extends Entity {
     public final static int DEAD_COUNTER = 150;
     private final static int SHOOT_RELOAD = 200;
 
-    private final PointD baseLocation;
+    private final PointD spawnpoint;
     private final Shoot shoot;
     private double movingNumber;
     private boolean alive;
     private double deadCounter;
     private double shootReload;
 
-    public MovingEntity(int texture, int code, int figuresNumber, PointD location, double width, double height, int scoreValue, boolean mortal) {
-        super(texture, code, figuresNumber, location, width, height, scoreValue, mortal);
+    public MovingEntity(int texture, int code, int figuresNumber, PointD spawnpoint, double width, double height, int scoreValue, boolean mortal) {
+        super(texture, code, figuresNumber, spawnpoint.clone(), width, height, scoreValue, mortal);
 
-        baseLocation = location.clone();
+        this.spawnpoint = spawnpoint;
         textureY = 58;
         if (code >= 1)
             textureY += 30;
@@ -57,11 +60,11 @@ public class MovingEntity extends Entity {
         visible = true;
         alive = true;
         deadCounter = DEAD_COUNTER;
-        location = baseLocation.clone();
+        movingNumber = 0;
+        location = spawnpoint.clone();
     }
 
     public void die() {
-//        deadCounter = DEAD_COUNTER;
         alive = false;
     }
 

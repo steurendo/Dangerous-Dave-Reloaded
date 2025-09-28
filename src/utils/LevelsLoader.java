@@ -24,6 +24,7 @@ public class LevelsLoader {
     private final double[] heights;
     private final int[] scoreValues;
     private final boolean[] mortals;
+    private final boolean[] climbables;
 
     public LevelsLoader(Textures textures) {
         this.textures = textures;
@@ -69,6 +70,13 @@ public class LevelsLoader {
                 false, false, false, false, false, false, false, false,
                 false, true, true, true, true, true, true, true,
                 true, true, true, true, true, true, true, true,};
+        climbables = new boolean[]{false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false,
+                false, true, true, true, true, true, true, false,
+                false, false, false, false, false, false, false, true,
+                true, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false,};
     }
 
     public Level loadLevelsStructure() {
@@ -113,6 +121,7 @@ public class LevelsLoader {
 
         char[] line = new char[8];
         boolean[][] map;
+        boolean[][] climbables;
         int[][] mapCodes;
         int levelWidth, tileCode;
         boolean hasWarpzone;
@@ -140,6 +149,7 @@ public class LevelsLoader {
 
         // Mappa logica del livello + disegno
         map = new boolean[levelWidth][TILES_ALONG_Y];
+        climbables = new boolean[levelWidth][TILES_ALONG_Y];
         mapCodes = new int[levelWidth][TILES_ALONG_Y];
         entities = new EntityChain[levelWidth];
         movingEntities = new ArrayList<>();
@@ -149,6 +159,7 @@ public class LevelsLoader {
                 GamedataReader.read(line);
                 tileCode = decrypt(line);
                 mapCodes[x][y] = tileCode;
+                climbables[x][y] = this.climbables[tileCode];
                 if (tileCode >= 1 && tileCode <= 18) { //BLOCCO
                     map[x][y] = true;
                     entitiesMap[x][y] = null;
@@ -157,7 +168,14 @@ public class LevelsLoader {
 
                     map[x][y] = false;
                     if (tileCode < 48) {
-                        entity = new Entity(textures.getTextureEntities(), tileCodes[tileCode], figuresNumber[tileCode], new PointD(x * 32 + 16, y * 32 + 16), widths[tileCode], heights[tileCode], scoreValues[tileCode], mortals[tileCode]);
+                        entity = new Entity(textures.getTextureEntities(),
+                                tileCodes[tileCode],
+                                figuresNumber[tileCode],
+                                new PointD(x * 32 + 16, y * 32 + 16),
+                                widths[tileCode],
+                                heights[tileCode],
+                                scoreValues[tileCode],
+                                mortals[tileCode]);
                         entitiesMap[x][y] = entity;
                         if (entities[x] == null)
                             entities[x] = new EntityChain(entity);
@@ -193,6 +211,7 @@ public class LevelsLoader {
         // Creazione del livello
         Level level = new Level(
                 map,
+                climbables,
                 levelWidth,
                 spawnpoint,
                 entities,

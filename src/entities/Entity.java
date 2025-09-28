@@ -14,7 +14,6 @@ public class Entity {
     protected double height;
     protected int scoreValue;
     protected boolean mortal;
-    //protected boolean climbable;
     protected boolean visible;
 
     public Entity(int texture, int code, int figuresNumber, PointD location, double width, double height, int scoreValue, boolean mortal) {
@@ -56,10 +55,6 @@ public class Entity {
         return figuresNumber;
     }
 
-    public PointD getLocation() {
-        return location;
-    }
-
     public double getX() {
         return location.x;
     }
@@ -86,14 +81,6 @@ public class Entity {
 
     public boolean isVisible() {
         return visible;
-    }
-
-    public void setX(double x) {
-        location.x = x;
-    }
-
-    public void setY(double y) {
-        location.y = y;
     }
 
     public void setVisible(boolean visible) {
