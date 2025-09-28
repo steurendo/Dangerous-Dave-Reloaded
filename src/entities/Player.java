@@ -90,11 +90,6 @@ public class Player {
         return new PointD(speedX, speedY);
     }
 
-//    public void normalizeSpeed() {
-//        speedX *= 0.707;
-//        speedY *= 0.707;
-//    }
-
     public double getSpeedX() {
         return speedX;
     }
@@ -173,14 +168,14 @@ public class Player {
 
     public void addScore(int score) {
         if ((this.score + score) / SCORE_LIFE > this.score / SCORE_LIFE)
-            if (lives < 4)
+            if (lives < 3)
                 lives++;
         this.score += score;
     }
 
-//    public void setJumpCooldown(int jumpCooldown) {
-//        this.jumpCooldown = jumpCooldown;
-//    }
+    public void setIfIsClimbing(boolean climbing) {
+        this.climbing = climbing;
+    }
 
     public void setIfIsJumping(boolean jumping) {
         if (jumping != this.jumping) {

@@ -4,6 +4,7 @@ import entities.*;
 import game.Level;
 import game.Model;
 import ui.Keyboard;
+import utils.Functions;
 import utils.PointD;
 import utils.Textures;
 
@@ -50,12 +51,29 @@ public class ScenarioLevel extends Scenario {
         if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
             player.shoot();
 
-        //Jetpack (Shift)
+        // Jetpack (Shift)
         if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
             if (player.getJetpackValue() > 0 && player.getJetpackToggle()) {
                 player.triggerJetpackToggle();
             }
         } else if (!player.getJetpackToggle()) player.jetpackToggleUnlock();
+
+        // Arrampicata
+        if (Keyboard.isKeyDown(GLFW_KEY_UP) ||
+                Keyboard.isKeyDown(GLFW_KEY_DOWN) ||
+                Keyboard.isKeyDown(GLFW_KEY_LEFT) ||
+                Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
+            Level currentLevel = model.getCurrentLevel();
+            boolean wouldClimb = false;
+            for (PointD corner : player.getCorners()) {
+                if (currentLevel.checkIfClimbable(corner)) {
+                    wouldClimb = true;
+                    break;
+                }
+            }
+            boolean canClimb = !player.isOnJetpack() && !player.isFalling();
+            player.setIfIsClimbing(canClimb && wouldClimb);
+        }
 
         // Spostamenti verticali (Freccia su, Freccia giù)
         if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
@@ -97,12 +115,6 @@ public class ScenarioLevel extends Scenario {
             else
                 player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
         }
-
-//        // Normalizzazione velocità su jetpack o arrampicando
-//        if (player.isOnJetpack() || player.isClimbing()) {
-//            PointD speed = player.getSpeed();
-//            if (speed.x != 0 && speed.y != 0) player.normalizeSpeed();
-//        }
 
         // Gravità
         if (!player.isOnJetpack() && !player.isClimbing()) {

@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Way better collisions">
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Implemented climbing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/MovingEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/PointD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/PointD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +22,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -62,7 +63,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;climbing&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/media/steurendo/Frog/Programmazione/Java/IntelliJ/DDR&quot;,
@@ -187,7 +188,23 @@
       <option name="project" value="LOCAL" />
       <updated>1758460417596</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Small fixes + improvements in physics">
+      <option name="closed" value="true" />
+      <created>1758463864901</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1758463864901</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Implemented climbing">
+      <option name="closed" value="true" />
+      <created>1759054900142</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1759054900142</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -214,6 +231,8 @@
     <MESSAGE value="Slightly cleaner" />
     <MESSAGE value="Better collisions" />
     <MESSAGE value="Way better collisions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Way better collisions" />
+    <MESSAGE value="Small fixes + improvements in physics" />
+    <MESSAGE value="Implemented climbing" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented climbing" />
   </component>
 </project>
