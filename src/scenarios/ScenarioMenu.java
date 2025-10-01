@@ -4,8 +4,8 @@ import game.Model;
 import ui.Keyboard;
 import utils.Textures;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class ScenarioMenu extends Scenario {
     private double figureNumber;
@@ -31,9 +31,10 @@ public class ScenarioMenu extends Scenario {
     @Override
     public void update(double deltaT) {
         figureNumber += deltaT * 60;
-        if (figureNumber >= 16) figureNumber -= 16;
-        if (figureNumber == 0)
+        if (figureNumber >= 16) {
+            figureNumber -= 16;
             drawText = !drawText;
+        }
     }
 
     @Override

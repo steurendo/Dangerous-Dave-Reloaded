@@ -497,16 +497,22 @@ public class ScenarioLevel extends Scenario {
         //GIOCATORE
         Textures.bindTexture(textures.getTextureMovingEntities());
         if (player.isAlive()) {
-            glBegin(GL_QUADS);
-            glTexCoord2d(((40d * player.getFigureNumber()) / 720), 0);
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-            glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), 0);
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-            glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-            glTexCoord2d(((40d * player.getFigureNumber()) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-            glEnd();
+            double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
+            double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
+            if (cutBottom < 0) cutBottom = 0;
+            if (cutTop < 0) cutTop = 0;
+            if (cutBottom < 32 && cutTop < 32) {
+                glBegin(GL_QUADS);
+                glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
+                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
+                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
+                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
+                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                glEnd();
+            }
         } else {
             glBegin(GL_QUADS);
             glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));

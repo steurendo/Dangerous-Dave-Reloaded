@@ -9,11 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Adjusted gamedata file, small physics fixes, small readability improvements">
-      <change afterPath="$PROJECT_DIR$/res/META-INF/MANIFEST.MF" afterDir="false" />
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Readme changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gamedata.dat" beforeDir="false" afterPath="$PROJECT_DIR$/gamedata_base.dat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +72,7 @@
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/media/steurendo/Frog/Programmazione/Java/IntelliJ/DDR&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/media/steurendo/Frog/Programmazione/Java/IntelliJ/DDR/assets&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
@@ -83,6 +82,9 @@
   }
 }</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/assets" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\steur\IdeaProjects\DangerousDaveReloaded" />
     </key>
@@ -220,7 +222,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759065277722</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Readme changes">
+      <option name="closed" value="true" />
+      <created>1759351555954</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1759351555954</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -250,6 +260,7 @@
     <MESSAGE value="Small fixes + improvements in physics" />
     <MESSAGE value="Implemented climbing" />
     <MESSAGE value="Adjusted gamedata file, small physics fixes, small readability improvements" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adjusted gamedata file, small physics fixes, small readability improvements" />
+    <MESSAGE value="Readme changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Readme changes" />
   </component>
 </project>
