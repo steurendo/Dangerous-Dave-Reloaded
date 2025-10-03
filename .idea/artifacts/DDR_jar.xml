@@ -3,30 +3,18 @@
     <output-path>$PROJECT_DIR$/out/artifacts/DDR_jar</output-path>
     <root id="archive" name="DDR.jar">
       <element id="module-output" name="DDR" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-glfw-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-glfw-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-glfw-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-glfw.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-jemalloc-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-jemalloc-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-jemalloc-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-jemalloc.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-openal-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-openal-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-openal-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-openal.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-opengl-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-opengl-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-opengl-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-opengl.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-stb-natives-linux.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-stb-natives-macos.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-stb-natives-windows.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl-stb.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/lwjgl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-opengl/3.3.6/lwjgl-opengl-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-glfw/3.3.6/lwjgl-glfw-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-openal/3.3.6/lwjgl-openal-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl/3.3.6/lwjgl-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-glfw/3.3.6/lwjgl-glfw-3.3.6-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-assimp/3.3.6/lwjgl-assimp-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-stb/3.3.6/lwjgl-stb-3.3.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-opengl/3.3.6/lwjgl-opengl-3.3.6-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-stb/3.3.6/lwjgl-stb-3.3.6-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl/3.3.6/lwjgl-3.3.6-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-assimp/3.3.6/lwjgl-assimp-3.3.6-natives-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-openal/3.3.6/lwjgl-openal-3.3.6-natives-linux.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
