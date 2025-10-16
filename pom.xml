@@ -11,7 +11,7 @@
 
     <properties>
         <lwjgl.version>3.3.6</lwjgl.version>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
+        <lwjgl.natives>natives-windows</lwjgl.natives>
     </properties>
 
     <dependencyManagement>

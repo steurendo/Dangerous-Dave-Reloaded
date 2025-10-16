@@ -12,21 +12,28 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class ScenarioLevel extends Scenario {
-    private final static int FIGURE_SPEED = 5;
+    private final static int FIGURE_SPEED = 6;
     private final static int MAX_FIGURE_NUMBER = 300;
 
     private final Player player;
     private double figureNumber;
+    private double movingEntitiesFigureNumber;
+    private double softPauseFigureNumber;
     private boolean paused;
+    private boolean softPaused;
+    private boolean showPlayer;
     private boolean pauseTrigger;
 
     public ScenarioLevel(Model model, Textures textures) {
         this.model = model;
         this.textures = textures;
         player = model.getPlayer();
-        player.setY(player.getY() - 0.001);
         figureNumber = 0;
+        movingEntitiesFigureNumber = 0;
+        softPauseFigureNumber = 0;
         paused = false;
+        softPaused = true;
+        showPlayer = true;
         pauseTrigger = true;
     }
 
@@ -113,6 +120,14 @@ public class ScenarioLevel extends Scenario {
                 player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
         }
 
+        if (softPaused) {
+            softPaused = !(Keyboard.isKeyDown(GLFW_KEY_LEFT)
+                    || Keyboard.isKeyDown(GLFW_KEY_RIGHT)
+                    || Keyboard.isKeyDown(GLFW_KEY_UP)
+                    || Keyboard.isKeyDown(GLFW_KEY_DOWN));
+            if (softPaused) return;
+        }
+
         // Gravità
         if (!player.isOnJetpack() && !player.isClimbing()) {
             if (player.getSpeedY() == 0)
@@ -124,7 +139,7 @@ public class ScenarioLevel extends Scenario {
 
     @Override
     public void collisions(double deltaT) {
-        if (!player.isAlive() || paused) return;
+        if (!player.isAlive() || paused || softPaused) return;
 
         // Controllo che il giocatore non stia andando in una warpzone
         warpzoneCheck();
@@ -219,18 +234,18 @@ public class ScenarioLevel extends Scenario {
         figureNumber += deltaT * 60;
         if (figureNumber >= MAX_FIGURE_NUMBER) figureNumber -= MAX_FIGURE_NUMBER;
 
-        if (!player.isAlive()) {
-            if (player.getDeadCounter() <= 0) {
-                if (player.getLives() > 0) {
-                    PointD spawnpoint = new PointD(
-                            model.getCurrentLevel().getSpawnpoint().x * 32 + 16,
-                            model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
-                    player.setLocation(spawnpoint);
-                    player.restart();
-                } else
-                    model.reset();
+        if (!player.isAlive() && player.getDeadCounter() <= 0) manageDeath();
+
+        if (softPaused) {
+            softPauseFigureNumber += deltaT * 60;
+            if (softPauseFigureNumber >= 16) {
+                softPauseFigureNumber -= 16;
+                showPlayer = !showPlayer;
             }
+            return;
         }
+        movingEntitiesFigureNumber += deltaT * 60;
+        if (movingEntitiesFigureNumber >= MAX_FIGURE_NUMBER) movingEntitiesFigureNumber -= MAX_FIGURE_NUMBER;
 
         player.update(deltaT);
         for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
@@ -264,6 +279,20 @@ public class ScenarioLevel extends Scenario {
         }
     }
 
+    private void manageDeath() {
+        if (player.getLives() > 0) {
+            PointD spawnpoint = new PointD(
+                    model.getCurrentLevel().getSpawnpoint().x * 32 + 16,
+                    model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
+            player.setLocation(spawnpoint);
+            player.restart();
+        } else
+            model.reset();
+        softPaused = true;
+        softPauseFigureNumber = 0;
+        showPlayer = true;
+    }
+
     @Override
     public void render(double deltaT) {
         int i;
@@ -271,6 +300,7 @@ public class ScenarioLevel extends Scenario {
         PointD playerLocation;
         int levelWidth;
         int figureNumber = (int) this.figureNumber;
+        int movingEntitiesFigureNumber = (int) this.movingEntitiesFigureNumber;
 
         levelWidth = model.getCurrentLevel().getWidth() * 32;
         playerLocation = player.getLocation();
@@ -452,7 +482,7 @@ public class ScenarioLevel extends Scenario {
             double limitYTexture, limitY;
 
             if (entity.isVisible()) {
-                textureNumber = (figureNumber / FIGURE_SPEED) % entity.getFiguresNumber();
+                textureNumber = (movingEntitiesFigureNumber / FIGURE_SPEED) % entity.getFiguresNumber();
                 limitY = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32) / 400;
                 limitYTexture = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? (entity.getTextureY() + entity.getHeight() - (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 - 332)) / entity.getTextureHeight() : (entity.getTextureY() + entity.getHeight()) / entity.getTextureHeight();
                 Textures.bindTexture(entity.getTexture());
@@ -496,34 +526,36 @@ public class ScenarioLevel extends Scenario {
         }
         //GIOCATORE
         Textures.bindTexture(textures.getTextureMovingEntities());
-        if (player.isAlive()) {
-            double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
-            double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
-            if (cutBottom < 0) cutBottom = 0;
-            if (cutTop < 0) cutTop = 0;
-            if (cutBottom < 32 && cutTop < 32) {
+        if (!softPaused || showPlayer) {
+            if (player.isAlive()) {
+                double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
+                double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
+                if (cutBottom < 0) cutBottom = 0;
+                if (cutTop < 0) cutTop = 0;
+                if (cutBottom < 32 && cutTop < 32) {
+                    glBegin(GL_QUADS);
+                    glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
+                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                    glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
+                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                    glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
+                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                    glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
+                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                    glEnd();
+                }
+            } else {
                 glBegin(GL_QUADS);
-                glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
-                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
-                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
-                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
-                glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
-                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
+                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
+                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
+                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
+                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
                 glEnd();
             }
-        } else {
-            glBegin(GL_QUADS);
-            glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-            glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-            glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-            glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-            glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-            glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-            glEnd();
         }
         //SPARI - GIOCATORE
         if (player.getShoot().isVisible()) {

@@ -18,9 +18,7 @@ public class Player {
     public final static double GRAVITY_MAX = 1.9;
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
-    public final static int RIGHT = 1;
-    public final static int LEFT = -1;
-    public final static int FIGURE_SPEED = 5;
+    public final static int FIGURE_SPEED = 6;
 
     private PointD location;
     private int lives;
@@ -200,10 +198,6 @@ public class Player {
         this.speedY = speedY;
     }
 
-    public void setLocation(Point location) {
-        setLocation(new PointD(location));
-    }
-
     public void setLocation(PointD location) {
         this.location.x = location.x;
         this.location.y = location.y;
@@ -230,15 +224,6 @@ public class Player {
     // Ricarica il jetpack
     public void rechargeJetpack() {
         jetpackValue = 60;
-    }
-
-    // Modifica lo stato (vivo/morto) del giocatore
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-        if (!alive) {
-            lives--;
-            deadCounter = 60;
-        }
     }
 
     // Sblocca la possibilità di usare il jetpack
@@ -276,7 +261,7 @@ public class Player {
         location = new PointD();
         lives = 3;
         score = 0;
-        speedX = SPEED_SLOW;
+        speedX = 0;
         speedY = 0;
         jetpackValue = 0;
         alive = true;
@@ -286,7 +271,7 @@ public class Player {
         jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
-        falling = false;
+        falling = true;
         climbing = false;
         shoot.setDirection(0);
         hasGun = false;
@@ -304,13 +289,13 @@ public class Player {
         lives--;
         directionX = 0;
         directionY = 0;
-        speedX = SPEED_SLOW;
+        speedX = 0;
         speedY = 0;
         onJetpack = false;
         jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
-        falling = false;
+        falling = true;
         climbing = false;
         shoot.setDirection(0);
         passedLevel = false;
@@ -325,13 +310,13 @@ public class Player {
         jetpackValue = 0;
         directionX = 0;
         directionY = 0;
-        speedX = SPEED_SLOW;
+        speedX = 0;
         speedY = 0;
         onJetpack = false;
         jetpackUnlocked = true;
         jumping = false;
         jumpCooldown = 0;
-        falling = false;
+        falling = true;
         climbing = false;
         shoot.setDirection(0);
         hasGun = false;
@@ -361,10 +346,10 @@ public class Player {
         setIfIsJumping(speedY < 0 && !onJetpack && !climbing);
         setIfIsFalling(speedY > 0 && !onJetpack && !climbing);
         if (jumping || falling) {
-            constantFigureNumber = directionX == LEFT ? 8 : 7;
+            constantFigureNumber = directionX == Directions.LEFT ? 8 : 7;
             maxFigureNumber = 1;
         } else if (onJetpack) {
-            constantFigureNumber = directionX == LEFT ? 15 : 12;
+            constantFigureNumber = directionX == Directions.LEFT ? 15 : 12;
             maxFigureNumber = 3;
         } else if (climbing) {
             constantFigureNumber = 9;
@@ -373,7 +358,7 @@ public class Player {
             constantFigureNumber = 0;
             maxFigureNumber = 1;
         } else {
-            constantFigureNumber = directionX == LEFT ? 4 : 1;
+            constantFigureNumber = directionX == Directions.LEFT ? 4 : 1;
             maxFigureNumber = 3;
         }
     }
