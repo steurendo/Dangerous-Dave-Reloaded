@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
-      <artifact name="DDR:jar" />
+      <artifact name="dangerous-dave-reloaded:jar" />
     </artifacts-to-build>
   </component>
   <component name="AutoImportSettings">
@@ -10,15 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Implemented soft-pause (beginning of the level)">
-      <change afterPath="$PROJECT_DIR$/dangerous-dave-reloaded.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/ErrorDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/DDR_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/dangerous_dave_reloaded_jar.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/game/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Model.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/LevelsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/LevelsLoader.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,8 +24,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -47,14 +43,17 @@
     &quot;assignee&quot;: &quot;steurendo&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/steurendo/DangerousDaveReloaded.git",
-    "accountId": "2a995aab-2370-4d5e-87a3-b6232a849d69"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/steurendo/DangerousDaveReloaded.git&quot;,
+    &quot;accountId&quot;: &quot;2a995aab-2370-4d5e-87a3-b6232a849d69&quot;
   }
-}]]></component>
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -85,7 +84,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "S:/Programmazione/Java/IntelliJ/DDR",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "Artifacts",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
@@ -98,6 +97,7 @@
       <recent name="$PROJECT_DIR$/assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="S:\Programmazione\Java\IntelliJ\DDR\res" />
       <recent name="C:\Users\steur\IdeaProjects\DangerousDaveReloaded" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -113,8 +113,8 @@
       </method>
     </configuration>
     <configuration name="MainJar" type="JarApplication">
-      <option name="JAR_PATH" value="$PROJECT_DIR$/out/artifacts/DDR_jar/DDR.jar" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="JAR_PATH" value="$PROJECT_DIR$/out/artifacts/dangerous_dave_reloaded_jar/dangerous-dave-reloaded.jar" />
+      <option name="WORKING_DIRECTORY" value="S:\Programmazione\Java\IntelliJ\DDR" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <method v="2" />
     </configuration>
@@ -268,7 +268,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759511087939</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Implemented soft-pause (beginning of the level)">
+      <option name="closed" value="true" />
+      <created>1760645383198</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1760645383198</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

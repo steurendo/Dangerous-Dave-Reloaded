@@ -6,8 +6,10 @@ import entities.MovingEntity;
 import game.Level;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static game.Level.OFFSET_Y;
@@ -95,7 +97,12 @@ public class LevelsLoader {
                     tilemap[x][y] = tilemapPicture.getSubimage(x * 32, y * 32, 32, 32);
 
             // Inizializzo il reader
-            GamedataReader.init();
+            try {
+                GamedataReader.init();
+            } catch (IOException e) {
+                ErrorDialog.show("Error: file 'gamedata.dat' not found.");
+                System.exit(0);
+            }
             line = new char[8];
 
             // Numero di livelli

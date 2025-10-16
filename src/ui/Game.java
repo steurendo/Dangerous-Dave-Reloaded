@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import scenarios.*;
+import utils.ErrorDialog;
 import utils.Textures;
 
 import java.nio.IntBuffer;
@@ -16,6 +17,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class Game {
+    public static final String WINDOW_TITLE = "Dangerous Dave - Reloaded";
     private long window;
     private int windowW;
     private int windowH;
@@ -32,12 +34,16 @@ public class Game {
             active = true;
             windowW = 1280;
             windowH = 800;
-            if (!GLFW.glfwInit())
-                throw new Exception("Unable to start GLFW");
+            if (!GLFW.glfwInit()) {
+                ErrorDialog.show("Errore: unable to start GLFW (code: -1).");
+                System.exit(-1);
+            }
             GLFW.glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
             window = GLFW.glfwCreateWindow(windowW, windowH, "Dangerous Dave - Reloaded", 0, 0);
-            if (window == 0)
-                throw new Exception("Unable to create window");
+            if (window == 0) {
+                ErrorDialog.show("Errore: unable to create window (code: -2).");
+                System.exit(-2);
+            }
             //CONTROLLO PRESSIONE TASTI
             glfwSetKeyCallback(window, input = new Keyboard());
             //AZIONI IN SEGUITO AD UN RESIZE
@@ -88,14 +94,6 @@ public class Game {
         }
     }
 
-    public int getWindowWidth() {
-        return windowW;
-    }
-
-    public int getWindowHeight() {
-        return windowH;
-    }
-
     public void start() {
         double t0, t1 = glfwGetTime(), deltaT, inc = 0;
         while (active) {
@@ -117,7 +115,7 @@ public class Game {
                 glfwSetWindowShouldClose(window, true);
             }
         }
-        //TERMINA LA SESSIONE GLFW
+        // Termina la sessione GLFW
         glfwDestroyWindow(window);
         glfwTerminate();
         input.free();
