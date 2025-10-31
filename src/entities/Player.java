@@ -2,20 +2,17 @@ package entities;
 
 import utils.PointD;
 
-import java.awt.*;
-
 import static game.Level.TILES_ALONG_Y;
 
 public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
     public final static double BOX_HEIGHT = 26;
-    public final static double SPEED_FAST = 1.9;
-    public final static double JUMP_POWER = -2.72;
+    public final static double SPEED_FAST = 2.2;
+    public final static double JUMP_POWER = -3.1;
     public final static int JUMP_COOLDOWN = 5;
-    public final static double SPEED_SLOW = 1.7;
-    public final static double GRAVITY = 0.07;
-    public final static double GRAVITY_MAX = 1.9;
+    public final static double SPEED_SLOW = 1.6;
+    public final static double GRAVITY = 0.072;
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
     public final static int FIGURE_SPEED = 6;

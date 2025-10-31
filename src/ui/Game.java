@@ -95,13 +95,17 @@ public class Game {
     }
 
     public void start() {
-        double t0, t1 = glfwGetTime(), deltaT, inc = 0;
+        double t0, t1 = glfwGetTime(), deltaT, deltaTAvg = 0;
         while (active) {
+            while (glfwGetTime() < t1 + 1f / 60);
             t0 = t1;
             t1 = glfwGetTime();
             deltaT = t1 - t0;
-            inc += deltaT;
-            if (inc >= 1) inc -= 1;
+            if (deltaT > 10 * deltaTAvg) {
+                deltaTAvg = (deltaTAvg + deltaT) / 2;
+                continue;
+            }
+            deltaTAvg = (deltaTAvg + deltaT) / 2;
             glfwPollEvents();
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -30,10 +30,8 @@ public class ScenarioLevel extends Scenario {
         player = model.getPlayer();
         figureNumber = 0;
         movingEntitiesFigureNumber = 0;
-        softPauseFigureNumber = 0;
         paused = false;
-        softPaused = true;
-        showPlayer = true;
+        setSoftPaused();
         pauseTrigger = true;
     }
 
@@ -131,9 +129,9 @@ public class ScenarioLevel extends Scenario {
         // Gravità
         if (!player.isOnJetpack() && !player.isClimbing()) {
             if (player.getSpeedY() == 0)
-                player.setSpeedY(Player.GRAVITY_MAX * deltaT * 60);
+                player.setSpeedY(Player.SPEED_FAST);
             else
-                player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY * deltaT * 60, Player.GRAVITY_MAX * deltaT * 60));
+                player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY * deltaT * 60, Player.SPEED_FAST));
         }
     }
 
@@ -168,7 +166,7 @@ public class ScenarioLevel extends Scenario {
             // Collisione lungo y
             if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
                 if (player.isJumping()) {
-                    speed.y = Player.GRAVITY_MAX;
+                    speed.y = Player.SPEED_FAST;
                 } else {
                     if (player.isOnJetpack() || player.isClimbing())
                         player.setY(Math.round((corner.y + speed.y) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
@@ -270,13 +268,21 @@ public class ScenarioLevel extends Scenario {
             if (player.getSpeedY() < Player.JUMP_POWER)
                 player.setSpeedY(Player.JUMP_POWER);
 
+            // Player has passed level
             if (player.hasPassedLevel()) {
                 if (model.getCurrentLevel().getNext() != null)
                     model.nextLevel();
                 else
                     model.reset();
+                setSoftPaused();
             }
         }
+    }
+
+    private void setSoftPaused() {
+        softPaused = true;
+        softPauseFigureNumber = 0;
+        showPlayer = true;
     }
 
     private void manageDeath() {
@@ -288,9 +294,7 @@ public class ScenarioLevel extends Scenario {
             player.restart();
         } else
             model.reset();
-        softPaused = true;
-        softPauseFigureNumber = 0;
-        showPlayer = true;
+        setSoftPaused();
     }
 
     @Override
