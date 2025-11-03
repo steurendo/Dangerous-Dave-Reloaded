@@ -9,11 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Added error dialog.">
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Fixed inconsistency in game updates when moving the window, fixed FPS at 60">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -283,7 +280,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760651869404</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Fixed inconsistency in game updates when moving the window, fixed FPS at 60">
+      <option name="closed" value="true" />
+      <created>1761930988743</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1761930988743</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -318,6 +323,7 @@
     <MESSAGE value="Added maven configuration" />
     <MESSAGE value="Implemented soft-pause (beginning of the level)" />
     <MESSAGE value="Added error dialog." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added error dialog." />
+    <MESSAGE value="Fixed inconsistency in game updates when moving the window, fixed FPS at 60" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed inconsistency in game updates when moving the window, fixed FPS at 60" />
   </component>
 </project>
