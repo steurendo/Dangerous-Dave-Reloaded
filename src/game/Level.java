@@ -3,7 +3,6 @@ package game;
 import entities.Entity;
 import entities.EntityChain;
 import entities.MovingEntity;
-import utils.Functions;
 import utils.PointD;
 
 import java.awt.*;
@@ -24,8 +23,21 @@ public class Level {
     private final int number;
     private Level next;
     private Level warpzone;
+    private LevelType levelType;
 
-    public Level(boolean[][] map, boolean[][] climbables, int width, Point spawnpoint, EntityChain[] entities, ArrayList<MovingEntity> movingEntities, Entity[][] entitiesMap, int texture, int number, Level next) {
+    public Level(
+            boolean[][] map,
+            boolean[][] climbables,
+            int width,
+            Point spawnpoint,
+            EntityChain[] entities,
+            ArrayList<MovingEntity> movingEntities,
+            Entity[][] entitiesMap,
+            int texture,
+            int number,
+            Level next,
+            LevelType levelType
+    ) {
         this.map = map;
         this.climbables = climbables;
         this.width = width;
@@ -37,6 +49,7 @@ public class Level {
         this.number = number;
         this.next = next;
         warpzone = null;
+        this.levelType = levelType;
     }
 
     public boolean checkPureCollision(double x, double y) {
@@ -74,6 +87,7 @@ public class Level {
         int mapY = (int) (y / 32);
         return climbables[mapX][mapY];
     }
+
     public boolean checkIfClimbable(PointD point) {
         return checkIfClimbable(point.x, point.y);
     }
@@ -104,6 +118,10 @@ public class Level {
 
     public Level getWarpzone() {
         return warpzone;
+    }
+
+    public LevelType getLevelType() {
+        return levelType;
     }
 
     public EntityChain[] getEntities() {

@@ -4,13 +4,14 @@ import entities.Entity;
 import entities.EntityChain;
 import entities.MovingEntity;
 import game.Level;
+import game.LevelType;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static game.Level.OFFSET_Y;
 import static game.Level.TILES_ALONG_Y;
@@ -27,6 +28,12 @@ public class LevelsLoader {
     private final int[] scoreValues;
     private final boolean[] mortals;
     private final boolean[] climbables;
+
+    private class LogicalLevel {
+        Level level;
+        int nextLevelId;
+        int warpzoneId;
+    }
 
     public LevelsLoader(Textures textures) {
         this.textures = textures;
@@ -85,7 +92,7 @@ public class LevelsLoader {
         Level firstLevel = null;
         try {
             int x, y;
-            char[] line;
+//            char[] line;
             BufferedImage tilemapPicture;
             BufferedImage[][] tilemap;
 
@@ -96,31 +103,63 @@ public class LevelsLoader {
                 for (y = 0; y < 7; y++)
                     tilemap[x][y] = tilemapPicture.getSubimage(x * 32, y * 32, 32, 32);
 
-            // Inizializzo il reader
-            try {
-                GamedataReader.init();
-            } catch (IOException e) {
-                ErrorDialog.show("Error: file 'gamedata.dat' not found.");
-                System.exit(0);
-            }
-            line = new char[8];
+//            // Inizializzo il reader
+//            try {
+//                GamedataReader.init();
+//            } catch (IOException e) {
+//                ErrorDialog.show("Error: file 'gamedata.dat' not found.");
+//                System.exit(0);
+//            }
+//            line = new char[8];
 
-            // Numero di livelli
-            GamedataReader.read(line);
-            int levelsCount = decrypt(line);
+//            // Numero di livelli
+//            GamedataReader.read(line);
+//            int levelsCount = decrypt(line);
+//
+//            // Numero di warpzones
+//            GamedataReader.read(line);
+//            int warpzonesCount = decrypt(line);
 
-            // Numero di warpzones
-            GamedataReader.read(line);
-            int warpzonesCount = decrypt(line);
+            HashMap<Integer, LogicalLevel> levels = loadLevels(tilemap);
+            firstLevel = buildLevelStructure(levels);
 
-            // Creo la struttura dei livelli ed ottengo il primo livello
-            firstLevel = createLevelsStructure(tilemap, 1, levelsCount);
+//            // Creo la struttura dei livelli ed ottengo il primo livello
+//            firstLevel = createLevelsStructure(tilemap, 1, levelsCount);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return firstLevel;
     }
 
+    private HashMap<Integer, LogicalLevel> loadLevels(BufferedImage[][] tilemap) throws Exception {
+        char[] line;
+        HashMap<Integer, LogicalLevel> logicalStructure = new HashMap<>();
+
+        // Inizializzo il reader
+        try {
+            GamedataReader.init();
+        } catch (IOException e) {
+            ErrorDialog.show("Error: file 'gamedata.dat' not found.");
+            System.exit(0);
+        }
+        line = new char[8];
+
+        // Numero di livelli
+        GamedataReader.read(line);
+        int levelsCount = decrypt(line);
+
+        // Numero di warpzones
+        GamedataReader.read(line);
+        int warpzonesCount = decrypt(line);
+
+        // Leggo sequenzialmente le righe
+
+        return logicalStructure;
+    }
+
+    private Level buildLevelStructure(HashMap<Integer, LogicalLevel> logicalStructure) {
+        return null;
+    }
 
     private Level createLevelsStructure(BufferedImage[][] tilemap, int levelNumber, int remainingLevels)
             throws Exception {
@@ -130,14 +169,17 @@ public class LevelsLoader {
         boolean[][] map;
         boolean[][] climbables;
         int[][] mapCodes;
-        int levelWidth, tileCode;
+        int levelId, levelWidth, tileCode;
         boolean hasWarpzone;
+        LevelType levelType;
         Point spawnpoint;
         EntityChain[] entities;
         ArrayList<MovingEntity> movingEntities;
         Entity[][] entitiesMap;
         BufferedImage background;
         Graphics gD;
+
+        // ID del livello
 
         // Lunghezza del livello
         GamedataReader.read(line);
@@ -153,6 +195,7 @@ public class LevelsLoader {
         // Link alla warpzone
         GamedataReader.read(line);
         hasWarpzone = decrypt(line) >= 0;
+        levelType = LevelType.LEVEL; // TODO
 
         // Mappa logica del livello + disegno
         map = new boolean[levelWidth][TILES_ALONG_Y];
@@ -226,7 +269,8 @@ public class LevelsLoader {
                 entitiesMap,
                 Textures.loadTexture(background),
                 levelNumber,
-                nextLevel
+                nextLevel,
+                levelType
         );
         if (hasWarpzone) {
             Level warpzone = createLevelsStructure(tilemap, levelNumber, 1);
