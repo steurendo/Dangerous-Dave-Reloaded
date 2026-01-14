@@ -11,8 +11,8 @@ public class GamedataReader {
         fileReader = new BufferedReader(new FileReader("gamedata.dat"));
     }
 
-    public static void read(char[] out) throws IOException {
+    public static int read(char[] out) throws IOException {
         if (fileReader == null) throw new IOException("The class \"GamedataReader\" was not initialized.");
-        int readCount = fileReader.read(out, 0, 8);
+        return fileReader.read(out, 0, 8);
     }
 }

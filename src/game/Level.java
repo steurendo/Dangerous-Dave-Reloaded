@@ -20,10 +20,11 @@ public class Level {
     private final ArrayList<MovingEntity> movingEntities;
     private final Entity[][] entitiesMap;
     private final int texture;
-    private final int number;
+    private int number;
     private Level next;
     private Level warpzone;
     private LevelType levelType;
+    private boolean warpzoneCompleted;
 
     public Level(
             boolean[][] map,
@@ -33,10 +34,7 @@ public class Level {
             EntityChain[] entities,
             ArrayList<MovingEntity> movingEntities,
             Entity[][] entitiesMap,
-            int texture,
-            int number,
-            Level next,
-            LevelType levelType
+            int texture
     ) {
         this.map = map;
         this.climbables = climbables;
@@ -46,10 +44,11 @@ public class Level {
         this.movingEntities = movingEntities;
         this.entitiesMap = entitiesMap;
         this.texture = texture;
-        this.number = number;
-        this.next = next;
+        number = -1;
+        next = null;
         warpzone = null;
-        this.levelType = levelType;
+        levelType = null;
+        warpzoneCompleted = false;
     }
 
     public boolean checkPureCollision(double x, double y) {
@@ -70,6 +69,10 @@ public class Level {
 
     public boolean checkPureCollision(PointD point) {
         return checkPureCollision(point.x, point.y);
+    }
+
+    public boolean isTouchingWorldBorders(double x, double y) {
+        return (x < 0 || x >= width * 32) || (y < 0 || y >= 14 * 32);
     }
 
     public boolean checkIfClimbable(double x, double y) {
@@ -108,6 +111,10 @@ public class Level {
         return number;
     }
 
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
     public Level getNext() {
         return next;
     }
@@ -122,6 +129,10 @@ public class Level {
 
     public LevelType getLevelType() {
         return levelType;
+    }
+
+    public void setLevelType(LevelType levelType) {
+        this.levelType = levelType;
     }
 
     public EntityChain[] getEntities() {
@@ -147,6 +158,14 @@ public class Level {
         return warpzone != null;
     }
 
+    public boolean isWarpzoneCompleted() {
+        return warpzoneCompleted;
+    }
+
+    public void toggleCompleteWarpzone() {
+        warpzoneCompleted = true;
+    }
+
     public void clearEntity(int x, int y) {
         entitiesMap[x][y] = null;
     }
@@ -155,7 +174,7 @@ public class Level {
         entitiesMap[(int) entity.getX() / 32][(int) entity.getY() / 32] = null;
     }
 
-    public void init() {
+    public void init(boolean resetWarpzoneState) {
         int x, y;
 
         for (x = 0; x < width; x++) {
@@ -165,6 +184,7 @@ public class Level {
         }
         for (MovingEntity entity : movingEntities)
             entity.init();
+        if (resetWarpzoneState) warpzoneCompleted = false;
     }
 
     public void reInitEntities(EntityChain entities, int x) {

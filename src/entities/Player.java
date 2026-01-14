@@ -342,7 +342,10 @@ public class Player {
             jumpCooldown--;
         setIfIsJumping(speedY < 0 && !onJetpack && !climbing);
         setIfIsFalling(speedY > 0 && !onJetpack && !climbing);
-        if (jumping || falling) {
+        if (directionX == 0) {
+            constantFigureNumber = 0;
+            maxFigureNumber = 1;
+        } else if (jumping || falling) {
             constantFigureNumber = directionX == Directions.LEFT ? 8 : 7;
             maxFigureNumber = 1;
         } else if (onJetpack) {
@@ -351,9 +354,6 @@ public class Player {
         } else if (climbing) {
             constantFigureNumber = 9;
             maxFigureNumber = 3;
-        } else if (directionX == 0) {
-            constantFigureNumber = 0;
-            maxFigureNumber = 1;
         } else {
             constantFigureNumber = directionX == Directions.LEFT ? 4 : 1;
             maxFigureNumber = 3;

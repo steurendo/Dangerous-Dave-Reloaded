@@ -32,7 +32,6 @@ public class ScenarioLevel extends Scenario {
         figureNumber = 0;
         movingEntitiesFigureNumber = 0;
         paused = false;
-        setSoftPaused();
         pauseTrigger = true;
     }
 
@@ -42,12 +41,11 @@ public class ScenarioLevel extends Scenario {
         LevelType levelType = model.getCurrentLevel().getLevelType();
 
         // Se il livello è un livello di transizione, forza la camminata verso destra
-        if (levelType == LevelType.TRANSITION_LEVEL) {
+        if (levelType == LevelType.TRANSITION_LEVEL || levelType == LevelType.TRANSITION_FROM_WARPZONE) {
             int directionX = Directions.RIGHT;
             player.setDirectionX(directionX);
             player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
-        }
-        else if (levelType != LevelType.TRANSITION_WARPZONE) {
+        } else if (levelType != LevelType.TRANSITION_WARPZONE) {
             // Pausa (P)
             if (Keyboard.isKeyDown(GLFW_KEY_P)) {
                 if (pauseTrigger) {
@@ -135,6 +133,9 @@ public class ScenarioLevel extends Scenario {
                         || Keyboard.isKeyDown(GLFW_KEY_DOWN));
                 if (softPaused) return;
             }
+        } else {
+            player.setDirectionX(Directions.STILL);
+            player.setSpeedX(0);
         }
 
         // Gravità
@@ -150,8 +151,12 @@ public class ScenarioLevel extends Scenario {
     public void collisions(double deltaT) {
         if (!player.isAlive() || paused || softPaused) return;
 
+        LevelType levelType = model.getCurrentLevel().getLevelType();
         // Controllo che il giocatore non stia andando in una warpzone
-        warpzoneCheck();
+        if (levelType == LevelType.LEVEL || levelType == LevelType.WARPZONE)
+            warpzoneCheck();
+        else
+            transitionCheck();
         // Verifico collisioni
         collisionsWithWorld();
         collisionsWithEntities();
@@ -160,11 +165,25 @@ public class ScenarioLevel extends Scenario {
 
     private void warpzoneCheck() {
         Level currentLevel = model.getCurrentLevel();
+        if (currentLevel.isWarpzoneCompleted()) return;
         double playerX = player.getX() + player.getSpeedX();
         boolean playerTouchingLeftBorder = (playerX - Player.WIDTH / 2) / 32 < 0;
         boolean playerTouchingRightBorder = (playerX + Player.WIDTH / 2) / 32 >= currentLevel.getWidth();
         if (playerTouchingLeftBorder || playerTouchingRightBorder) {
             if (currentLevel.hasWarpzone()) model.nextWarpzone();
+        }
+    }
+
+    private void transitionCheck() {
+        Level level = model.getCurrentLevel();
+        PointD speed = player.getSpeed();
+        PointD[] corners = player.getCorners();
+
+        for (PointD corner : corners) {
+            if (level.isTouchingWorldBorders(corner.x + speed.x, corner.y + speed.y)) {
+                model.nextLevel(this::setSoftPaused);
+                return;
+            }
         }
     }
 
@@ -285,7 +304,6 @@ public class ScenarioLevel extends Scenario {
                     model.nextLevel();
                 else
                     model.reset();
-                setSoftPaused();
             }
         }
     }
