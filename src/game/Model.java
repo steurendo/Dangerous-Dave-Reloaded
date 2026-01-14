@@ -1,6 +1,7 @@
 package game;
 
 import entities.Player;
+import utils.Callback;
 import utils.LevelsLoader;
 import utils.PointD;
 import utils.Textures;
@@ -15,7 +16,7 @@ public class Model {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
         levelsRoot = loader.loadLevelsStructure();
-        currentLevel = levelsRoot;
+        currentLevel = levelsRoot.getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext();
         player = new Player();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
     }
@@ -36,7 +37,7 @@ public class Model {
         state = 0;
         player.reset();
         currentLevel = levelsRoot;
-        currentLevel.init();
+        currentLevel.init(true);
         // Player nello spawnpoint
         PointD spawnpoint = new PointD(
                 currentLevel.getSpawnpoint().x * 32 + 16,
@@ -48,18 +49,25 @@ public class Model {
         state = 1;
     }
 
-    public void nextLevel() {
+    public void nextLevel(Callback afterTransitionCallback) {
         currentLevel = currentLevel.getNext();
         nextGenericLevel();
+        afterTransitionCallback.execute();
+    }
+
+    public void nextLevel() {
+        nextLevel(() -> {
+        });
     }
 
     public void nextWarpzone() {
+        currentLevel.toggleCompleteWarpzone();
         currentLevel = currentLevel.getWarpzone();
         nextGenericLevel();
     }
 
     public void nextGenericLevel() {
-        currentLevel.init();
+        currentLevel.init(false);
         player.passLevel();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
     }

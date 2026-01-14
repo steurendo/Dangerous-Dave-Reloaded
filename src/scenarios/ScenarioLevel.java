@@ -2,6 +2,7 @@ package scenarios;
 
 import entities.*;
 import game.Level;
+import game.LevelType;
 import game.Model;
 import ui.Keyboard;
 import utils.PointD;
@@ -15,7 +16,7 @@ public class ScenarioLevel extends Scenario {
     private final static int FIGURE_SPEED = 6;
     private final static int MAX_FIGURE_NUMBER = 300;
 
-    private final Player player;
+    protected final Player player;
     private double figureNumber;
     private double movingEntitiesFigureNumber;
     private double softPauseFigureNumber;
@@ -31,99 +32,110 @@ public class ScenarioLevel extends Scenario {
         figureNumber = 0;
         movingEntitiesFigureNumber = 0;
         paused = false;
-        setSoftPaused();
         pauseTrigger = true;
     }
 
 
     @Override
     public void commands(double deltaT) {
-        // Pausa (P)
-        if (Keyboard.isKeyDown(GLFW_KEY_P)) {
-            if (pauseTrigger) {
-                paused = !paused;
-                pauseTrigger = false;
+        LevelType levelType = model.getCurrentLevel().getLevelType();
+
+        // Se il livello è un livello di transizione, forza la camminata verso destra
+        if (levelType == LevelType.TRANSITION_LEVEL || levelType == LevelType.TRANSITION_FROM_WARPZONE) {
+            int directionX = Directions.RIGHT;
+            player.setDirectionX(directionX);
+            player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
+        } else if (levelType != LevelType.TRANSITION_WARPZONE) {
+            // Pausa (P)
+            if (Keyboard.isKeyDown(GLFW_KEY_P)) {
+                if (pauseTrigger) {
+                    paused = !paused;
+                    pauseTrigger = false;
+                }
+            } else
+                pauseTrigger = true;
+            if (paused) return;
+
+            // Se il player sta morendo, non vengono processati comandi
+            if (!player.isAlive()) return;
+
+            // Sparo (Ctrl)
+            if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
+                player.shoot();
+
+            // Jetpack (Shift)
+            if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
+                if (player.isJetpackUnlocked()) player.triggerJetpackToggle();
+            } else if (!player.isJetpackUnlocked()) player.unlockJetpack();
+
+            // Arrampicata
+            if (Keyboard.isKeyDown(GLFW_KEY_UP) ||
+                    Keyboard.isKeyDown(GLFW_KEY_DOWN) ||
+                    Keyboard.isKeyDown(GLFW_KEY_LEFT) ||
+                    Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
+                Level currentLevel = model.getCurrentLevel();
+                boolean wouldClimb = false;
+                for (PointD corner : player.getCorners()) {
+                    if (currentLevel.checkIfClimbable(corner)) {
+                        wouldClimb = true;
+                        break;
+                    }
+                }
+                boolean canClimb = !player.isOnJetpack() && !player.isFalling();
+                player.setIfIsClimbing(canClimb && wouldClimb);
             }
-        } else
-            pauseTrigger = true;
-        if (paused) return;
 
-        // Se il player sta morendo, non vengono processati comandi
-        if (!player.isAlive()) return;
+            // Spostamenti verticali (Freccia su, Freccia giù)
+            if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
+                int directionY;
 
-        // Sparo (Ctrl)
-        if ((Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_CONTROL)) && player.canShoot())
-            player.shoot();
-
-        // Jetpack (Shift)
-        if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) || Keyboard.isKeyDown(GLFW_KEY_RIGHT_SHIFT)) {
-            if (player.isJetpackUnlocked()) player.triggerJetpackToggle();
-        } else if (!player.isJetpackUnlocked()) player.unlockJetpack();
-
-        // Arrampicata
-        if (Keyboard.isKeyDown(GLFW_KEY_UP) ||
-                Keyboard.isKeyDown(GLFW_KEY_DOWN) ||
-                Keyboard.isKeyDown(GLFW_KEY_LEFT) ||
-                Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
-            Level currentLevel = model.getCurrentLevel();
-            boolean wouldClimb = false;
-            for (PointD corner : player.getCorners()) {
-                if (currentLevel.checkIfClimbable(corner)) {
-                    wouldClimb = true;
-                    break;
+                directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
+                if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
+                    player.setDirectionY(Directions.DOWN);
+                } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
+                    player.setDirectionY(Directions.UP);
+                else
+                    player.setDirectionY(directionY);
+                if (player.isOnJetpack() || player.isClimbing()) {
+                    player.setSpeedY(Player.SPEED_FAST * directionY * deltaT * 60);
+                } else if (directionY == Directions.UP) {
+                    if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
+                        player.setSpeedY(Player.JUMP_POWER);
+                        player.setIfIsJumping(true);
+                    }
                 }
             }
-            boolean canClimb = !player.isOnJetpack() && !player.isFalling();
-            player.setIfIsClimbing(canClimb && wouldClimb);
-        }
 
-        // Spostamenti verticali (Freccia su, Freccia giù)
-        if (Keyboard.isKeyDown(GLFW_KEY_UP) != Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
-            int directionY;
+            // Spostamenti orizzontali (Freccia sinistra, Freccia destra)
+            if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
+                int directionX;
 
-            directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
-            if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
-                player.setDirectionY(Directions.DOWN);
-            } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
-                player.setDirectionY(Directions.UP);
-            else
-                player.setDirectionY(directionY);
-            if (player.isOnJetpack() || player.isClimbing()) {
-                player.setSpeedY(Player.SPEED_FAST * directionY * deltaT * 60);
-            } else if (directionY == Directions.UP) {
-                if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
-                    player.setSpeedY(Player.JUMP_POWER);
-                    player.setIfIsJumping(true);
-                }
+                directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? Directions.RIGHT : Directions.LEFT;
+                if (player.getDirectionX() == Directions.RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
+                    player.setDirectionX(Directions.LEFT);
+                else if (player.getDirectionX() == Directions.LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
+                    player.setDirectionX(Directions.RIGHT);
+                else
+                    player.setDirectionX(directionX);
+
+                if (player.isClimbing() || player.isOnJetpack())
+                    player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
+                else if (player.isJumping() || player.isFalling())
+                    player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
+                else
+                    player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
             }
-        }
 
-        // Spostamenti orizzontali (Freccia sinistra, Freccia destra)
-        if (Keyboard.isKeyDown(GLFW_KEY_RIGHT) != Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
-            int directionX;
-
-            directionX = Keyboard.isKeyDown(GLFW_KEY_RIGHT) ? Directions.RIGHT : Directions.LEFT;
-            if (player.getDirectionX() == Directions.RIGHT && Keyboard.isKeyDown(GLFW_KEY_LEFT))
-                player.setDirectionX(Directions.LEFT);
-            else if (player.getDirectionX() == Directions.LEFT && Keyboard.isKeyDown(GLFW_KEY_RIGHT))
-                player.setDirectionX(Directions.RIGHT);
-            else
-                player.setDirectionX(directionX);
-
-            if (player.isClimbing() || player.isOnJetpack())
-                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
-            else if (player.isJumping() || player.isFalling())
-                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
-            else
-                player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
-        }
-
-        if (softPaused) {
-            softPaused = !(Keyboard.isKeyDown(GLFW_KEY_LEFT)
-                    || Keyboard.isKeyDown(GLFW_KEY_RIGHT)
-                    || Keyboard.isKeyDown(GLFW_KEY_UP)
-                    || Keyboard.isKeyDown(GLFW_KEY_DOWN));
-            if (softPaused) return;
+            if (softPaused) {
+                softPaused = !(Keyboard.isKeyDown(GLFW_KEY_LEFT)
+                        || Keyboard.isKeyDown(GLFW_KEY_RIGHT)
+                        || Keyboard.isKeyDown(GLFW_KEY_UP)
+                        || Keyboard.isKeyDown(GLFW_KEY_DOWN));
+                if (softPaused) return;
+            }
+        } else {
+            player.setDirectionX(Directions.STILL);
+            player.setSpeedX(0);
         }
 
         // Gravità
@@ -139,8 +151,12 @@ public class ScenarioLevel extends Scenario {
     public void collisions(double deltaT) {
         if (!player.isAlive() || paused || softPaused) return;
 
+        LevelType levelType = model.getCurrentLevel().getLevelType();
         // Controllo che il giocatore non stia andando in una warpzone
-        warpzoneCheck();
+        if (levelType == LevelType.LEVEL || levelType == LevelType.WARPZONE)
+            warpzoneCheck();
+        else
+            transitionCheck();
         // Verifico collisioni
         collisionsWithWorld();
         collisionsWithEntities();
@@ -149,11 +165,25 @@ public class ScenarioLevel extends Scenario {
 
     private void warpzoneCheck() {
         Level currentLevel = model.getCurrentLevel();
+        if (currentLevel.isWarpzoneCompleted()) return;
         double playerX = player.getX() + player.getSpeedX();
         boolean playerTouchingLeftBorder = (playerX - Player.WIDTH / 2) / 32 < 0;
         boolean playerTouchingRightBorder = (playerX + Player.WIDTH / 2) / 32 >= currentLevel.getWidth();
         if (playerTouchingLeftBorder || playerTouchingRightBorder) {
             if (currentLevel.hasWarpzone()) model.nextWarpzone();
+        }
+    }
+
+    private void transitionCheck() {
+        Level level = model.getCurrentLevel();
+        PointD speed = player.getSpeed();
+        PointD[] corners = player.getCorners();
+
+        for (PointD corner : corners) {
+            if (level.isTouchingWorldBorders(corner.x + speed.x, corner.y + speed.y)) {
+                model.nextLevel(this::setSoftPaused);
+                return;
+            }
         }
     }
 
@@ -274,7 +304,6 @@ public class ScenarioLevel extends Scenario {
                     model.nextLevel();
                 else
                     model.reset();
-                setSoftPaused();
             }
         }
     }

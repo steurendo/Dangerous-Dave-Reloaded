@@ -24,7 +24,6 @@ public class Game {
     private GLFWKeyCallback input;
     private Model model;
     private Scenario scenarioLevel;
-    private Scenario scenarioTransition;
     private Scenario scenarioScore;
     private Scenario[] switchScenario;
     private boolean active;
@@ -86,9 +85,8 @@ public class Game {
             model = new Model(textures);
             Scenario scenarioMenu = new ScenarioMenu(model, textures);
             scenarioLevel = new ScenarioLevel(model, textures);
-            scenarioTransition = new ScenarioTransition(model, textures);
             scenarioScore = new ScenarioScore(model, textures);
-            switchScenario = new Scenario[]{scenarioMenu, scenarioLevel, scenarioTransition, scenarioScore};
+            switchScenario = new Scenario[]{scenarioMenu, scenarioLevel, scenarioScore};
         } catch (Exception e) {
             e.printStackTrace();
         }

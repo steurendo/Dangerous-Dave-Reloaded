@@ -9,8 +9,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Fixed inconsistency in game updates when moving the window, fixed FPS at 60">
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Progresses">
+      <change afterPath="$PROJECT_DIR$/src/utils/Callback.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gamedata.dat" beforeDir="false" afterPath="$PROJECT_DIR$/gamedata.dat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game/Level.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Level.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game/LevelType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/LevelType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/GamedataReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/GamedataReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/LevelsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/LevelsLoader.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,8 +29,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Enum" />
         <option value="Class" />
+        <option value="Enum" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -76,7 +86,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;transitions&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;S:/Programmazione/Java/IntelliJ/DDR&quot;,
@@ -90,6 +100,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="S:\Programmazione\Java\IntelliJ\DDR" />
       <recent name="$PROJECT_DIR$/assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -288,7 +299,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761930988743</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Readme fixes">
+      <option name="closed" value="true" />
+      <created>1762209445074</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1762209445074</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Progresses">
+      <option name="closed" value="true" />
+      <created>1768076761550</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1768076761550</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -324,6 +351,15 @@
     <MESSAGE value="Implemented soft-pause (beginning of the level)" />
     <MESSAGE value="Added error dialog." />
     <MESSAGE value="Fixed inconsistency in game updates when moving the window, fixed FPS at 60" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed inconsistency in game updates when moving the window, fixed FPS at 60" />
+    <MESSAGE value="Readme fixes" />
+    <MESSAGE value="Progresses" />
+    <option name="LAST_COMMIT_MESSAGE" value="Progresses" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="((toDec(src) / LevelsLoader.PW) - LevelsLoader.LV)" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
