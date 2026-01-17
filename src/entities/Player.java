@@ -16,6 +16,7 @@ public class Player {
     public final static int SCORE_LIFE = 20000;
     public final static int DEAD_COUNTER = 150;
     public final static int FIGURE_SPEED = 6;
+    public final static double FREE_FALLING_SPEED = 2.1;
 
     private PointD location;
     private int lives;
@@ -40,6 +41,7 @@ public class Player {
     private int maxFigureNumber;
     private double figureNumber;
     private double deadCounter;
+    private boolean freeFalling;
 
     public Player() {
         figureNumber = 0;
@@ -125,6 +127,14 @@ public class Player {
         return falling;
     }
 
+    public void setFreeFalling(boolean freeFalling) {
+        this.freeFalling = freeFalling;
+    }
+
+    public boolean isFreeFalling() {
+        return freeFalling;
+    }
+
     public boolean isClimbing() {
         return climbing;
     }
@@ -198,10 +208,6 @@ public class Player {
     public void setLocation(PointD location) {
         this.location.x = location.x;
         this.location.y = location.y;
-    }
-
-    public void setX(double x) {
-        location.x = x;
     }
 
     public void setY(double y) {
@@ -340,8 +346,9 @@ public class Player {
         }
         if (jumpCooldown > 0)
             jumpCooldown--;
-        setIfIsJumping(speedY < 0 && !onJetpack && !climbing);
-        setIfIsFalling(speedY > 0 && !onJetpack && !climbing);
+        if (jumping)
+            setIfIsJumping(speedY < FREE_FALLING_SPEED && !onJetpack && !climbing);
+        setIfIsFalling(speedY > FREE_FALLING_SPEED && !onJetpack && !climbing);
         if (directionX == 0) {
             constantFigureNumber = 0;
             maxFigureNumber = 1;

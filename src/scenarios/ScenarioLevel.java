@@ -90,6 +90,7 @@ public class ScenarioLevel extends Scenario {
                 int directionY;
 
                 directionY = Keyboard.isKeyDown(GLFW_KEY_UP) ? Directions.UP : Directions.DOWN;
+                if (player.getDirectionX() == Directions.STILL) player.setDirectionX(Directions.RIGHT);
                 if (player.getDirectionY() == Directions.UP && Keyboard.isKeyDown(GLFW_KEY_DOWN)) {
                     player.setDirectionY(Directions.DOWN);
                 } else if (player.getDirectionY() == Directions.DOWN && Keyboard.isKeyDown(GLFW_KEY_UP))
@@ -118,12 +119,16 @@ public class ScenarioLevel extends Scenario {
                 else
                     player.setDirectionX(directionX);
 
-                if (player.isClimbing() || player.isOnJetpack())
-                    player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
-                else if (player.isJumping() || player.isFalling())
+                if (player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling())
                     player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
                 else
                     player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
+                player.setFreeFalling(player.isFalling());
+            }
+
+            if (player.isFreeFalling()) {
+                int directionX = player.getDirectionX();
+                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
             }
 
             if (softPaused) {
@@ -204,11 +209,13 @@ public class ScenarioLevel extends Scenario {
                         player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
                     }
                     speed.y = 0;
+                    player.setFreeFalling(false);
                 }
             }
             // Collisione lungo x
             if (level.checkPureCollision(corner.x + speed.x, corner.y)) {
                 speed.x = 0;
+                player.setFreeFalling(false);
             }
         }
         player.setSpeed(speed);
