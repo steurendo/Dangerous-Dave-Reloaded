@@ -28,6 +28,7 @@ public class LevelsLoader {
     private final int[] scoreValues;
     private final boolean[] mortals;
     private final boolean[] climbables;
+    private int levelsCount;
 
     private static class LogicalLevel {
         Level level;
@@ -95,6 +96,7 @@ public class LevelsLoader {
                 false, false, false, false, false, false, false, true,
                 true, false, false, false, false, false, false, false,
                 false, false, false, false, false, false, false, false,};
+        levelsCount = 0;
     }
 
     public Level loadLevelsStructure() {
@@ -119,6 +121,10 @@ public class LevelsLoader {
             e.printStackTrace();
         }
         return firstLevel;
+    }
+
+    public int getLevelsCount() {
+        return levelsCount;
     }
 
     private LogicalStructure loadLevels(BufferedImage[][] tilemap) throws Exception {
@@ -158,11 +164,13 @@ public class LevelsLoader {
 
     private Level buildLevelStructure(LogicalStructure logicalStructure) {
         HashMap<Integer, LogicalLevel> structure = logicalStructure.structure;
-
-        return consumeLogicalLevel(structure, structure.get(logicalStructure.firstLevelId), 0);
+        levelsCount = 0;
+        return consumeLogicalLevel(structure, structure.get(logicalStructure.firstLevelId), 1);
     }
 
     private Level consumeLogicalLevel(HashMap<Integer, LogicalLevel> structure, LogicalLevel logicalLevel, int number) {
+        levelsCount += 1;
+
         // Livello
         Level level = logicalLevel.level;
         level.setLevelType(LevelType.LEVEL);
