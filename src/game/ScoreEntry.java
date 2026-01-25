@@ -3,7 +3,7 @@ package game;
 import java.io.Serializable;
 
 public class ScoreEntry implements Serializable {
-    private final String playerName;
+    private String playerName;
     private final int score;
     private final int level;
 
@@ -11,6 +11,10 @@ public class ScoreEntry implements Serializable {
         this.playerName = playerName;
         this.score = score;
         this.level = level;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 
     public String getPlayerName() {

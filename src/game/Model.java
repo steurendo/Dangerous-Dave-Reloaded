@@ -18,11 +18,11 @@ public class Model {
     private final int levelsCount;
     private boolean gameFinished;
     private boolean newHighScore;
+    private boolean waitCommand;
 
     public Model(Textures textures) {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
-//        levelsRoot = loader.loadLevelsStructure().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext();
         levelsRoot = loader.loadLevelsStructure();
         levelsCount = loader.getLevelsCount();
         currentLevel = levelsRoot;
@@ -31,6 +31,7 @@ public class Model {
         gameFinished = false;
         canStart = false;
         newHighScore = false;
+        waitCommand = false;
         prepareForStart();
     }
 
@@ -84,7 +85,13 @@ public class Model {
         gameFinished = false;
         canStart = false;
         newHighScore = false;
+        waitCommand = false;
         prepareForStart();
+    }
+
+    public boolean isWaitingForCommand() {return waitCommand;}
+    public void setWaitCommand() {
+        waitCommand = true;
     }
 
     public void start() {

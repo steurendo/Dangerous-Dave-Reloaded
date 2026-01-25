@@ -4,6 +4,7 @@ import entities.*;
 import game.*;
 import ui.AlphaNumInputKeys;
 import ui.Keyboard;
+import ui.SpamLockTime;
 import utils.PointD;
 import utils.Textures;
 
@@ -41,11 +42,18 @@ public class ScenarioLevel extends Scenario {
     public void commands(double deltaT) {
         LevelType levelType = model.getCurrentLevel().getLevelType();
 
+        if (model.isWaitingForCommand()) {
+            if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
+                setSoftPaused();
+                model.reset();
+            } else return;
+        }
+
         // Se il giocatore ha fatto un nuovo punteggio migliore
         if (model.isNewHighScore()) {
             handleNewScorePrompt(modelScore::type);
             if (Keyboard.isKeyDown(GLFW_KEY_ENTER)) {
-                modelScore.insertNew();
+                modelScore.persistScoreTable();
                 setSoftPaused();
                 model.reset();
             }
@@ -56,9 +64,11 @@ public class ScenarioLevel extends Scenario {
         if (model.isGameFinished()) {
             if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
                 if (modelScore.isValidCandidate(player.getScore())) {
-                    modelScore.setScore(player.getScore());
-                    modelScore.setLevel(model.getCurrentLevel().getNumber());
+                    modelScore.insertNew(new ScoreEntry("", player.getScore(), model.getCurrentLevel().getNumber()));
                     model.setNewHighScore(true);
+                } else {
+                    Keyboard.spamLock(SpamLockTime.Long);
+                    model.setWaitCommand();
                 }
             } else return;
         }
@@ -352,7 +362,6 @@ public class ScenarioLevel extends Scenario {
 
     @Override
     public void render(double deltaT) {
-        int i;
         double viewport;
         PointD playerLocation;
         int levelWidth;
@@ -391,7 +400,7 @@ public class ScenarioLevel extends Scenario {
         endX = Math.min((int) viewport / 32 + 25, levelWidth / 32);
 
         // Entità ferme
-        for (i = startX; i < endX; i++)
+        for (int i = startX; i < endX; i++)
             drawEntities(level.getEntities()[i], viewport);
 
         // Schermata di fine gioco
@@ -407,10 +416,9 @@ public class ScenarioLevel extends Scenario {
             glTexCoord2d(0, (256d / 596));
             glVertex2d((48d / 640), (320d / 400));
             glEnd();
-        }
-        else {
+        } else {
             // Punteggio
-            for (i = 0; i < 7; i++) {
+            for (int i = 0; i < 7; i++) {
                 int digit;
                 digit = player.getScore() / (int) Math.pow(10, 6 - i) % 10;
                 Textures.bindTexture(textures.getTextureGameParts());
@@ -427,7 +435,7 @@ public class ScenarioLevel extends Scenario {
             }
 
             // Numero livello
-            for (i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 int digit;
 
                 digit = level.getNumber() / (int) Math.pow(10, 1 - i) % 10;
@@ -446,7 +454,7 @@ public class ScenarioLevel extends Scenario {
 
             // Vite rimanenti
             Textures.bindTexture(textures.getTextureGameParts());
-            for (i = 0; i < player.getLives(); i++) {
+            for (int i = 0; i < player.getLives(); i++) {
                 glBegin(GL_QUADS);
                 glTexCoord2d(0, (216d / 290));
                 glVertex2d(((512d + i * 32) / 640), 0);
@@ -486,7 +494,7 @@ public class ScenarioLevel extends Scenario {
                 glVertex2d((144d / 640), (364d / 400));
                 glEnd();
                 // Energia rimanente
-                for (i = 0; i < player.getJetpackValue(); i++) {
+                for (int i = 0; i < player.getJetpackValue(); i++) {
                     Textures.bindTexture(textures.getTextureGameParts());
                     glBegin(GL_QUADS);
                     glTexCoord2d(0, (208d / 290));
@@ -765,7 +773,7 @@ public class ScenarioLevel extends Scenario {
 
         if (model.isGameFinished()) {
             Textures.bindTexture(textures.getTextureScoreParts());
-            if (model.isNewHighScore()) {
+            if (model.isNewHighScore() || model.isWaitingForCommand()) {
                 // Disegna tabella punteggi
                 glBegin(GL_QUADS);
                 glTexCoord2d(0, (300d / 596));
@@ -777,12 +785,11 @@ public class ScenarioLevel extends Scenario {
                 glTexCoord2d(0, (536d / 596));
                 glVertex2d((114d / 640), (318d / 400));
                 glEnd();
-                // Disegna punteggi
-                // x -> 114 + 62 (cifra più grossa)
-                // delta x -> 32 (da score a nome)
-                // delta x -> 80 (da nome a numero più grosso)
-                // y -> 82 + 78
-                // delta y -> 16
+
+                // Disegna tutti i punteggi
+                drawScoreTable();
+            }
+            if (model.isNewHighScore()) {
                 // Disegna "NEW HIGH SCORE"
                 glBegin(GL_QUADS);
                 glTexCoord2d(0, (536d / 596));
@@ -843,14 +850,102 @@ public class ScenarioLevel extends Scenario {
     }
 
     private void handleNewScorePrompt(NewScorePrompt callback) {
-        if (Keyboard.isKeyDown(GLFW_KEY_DELETE)) callback.prompt(null, true);
-        else {
-            if (modelScore.getPlayerName().length() == 3) return;
+        if (!Keyboard.isAvailable()) return;
+        String playerName = modelScore.getPlayerName();
+        if (Keyboard.isKeyDown(GLFW_KEY_BACKSPACE) && !playerName.isEmpty()) {
+            callback.prompt(null, true);
+            Keyboard.spamLock(SpamLockTime.Short);
+        } else {
+            if (playerName.length() == 3) return;
+            Keyboard.spamLock(SpamLockTime.Short);
             for (int i = 0; i < AlphaNumInputKeys.keys.length; i++)
-                if (Keyboard.isKeyDown(AlphaNumInputKeys.keys[i])){
+                if (Keyboard.isKeyDown(AlphaNumInputKeys.keys[i])) {
                     callback.prompt(AlphaNumInputKeys.values.substring(i, i + 1), false);
                     return;
                 }
+        }
+    }
+
+    private void drawScoreTable() {
+        ScoreEntry entry;
+        String playerName;
+        String scoreString;
+        String levelString;
+        int offsetX, offsetY, j;
+
+        for (int i = 0; i < modelScore.getScoreTable().size(); i++) {
+            offsetY = 32 * i;
+            entry = modelScore.getScoreTable().get(i);
+            playerName = entry.getPlayerName();
+            scoreString = "" + entry.getScore();
+            levelString = "" + entry.getLevel();
+
+            // Disegna punteggio
+            offsetX = 176 + (6 - scoreString.length()) * 16;
+            for (j = 0; j < scoreString.length(); j++) {
+                int value = scoreString.charAt(j) - '0';
+                glBegin(GL_QUADS);
+                glTexCoord2d(((416d + value * 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16 + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16 + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+
+            // Disegna nome
+            offsetX = 304;
+            for (j = 0; j < playerName.length(); j++) {
+                int value = playerName.charAt(j)
+                        + (Character.isDigit(playerName.charAt(j)) ? -'0' + 26 : -'A');
+                glBegin(GL_QUADS);
+                glTexCoord2d(((value * 16d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((value * 16d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((value * 16d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((value * 16d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+            // Disegna il cursore
+            int figureNumber = ((int) (this.figureNumber / 5)) % 4;
+            if (modelScore.getCurrentIndex() == i) {
+                glBegin(GL_QUADS);
+                glTexCoord2d(((figureNumber * 16 + 576d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+
+            // Disegna livello
+            boolean won = levelString.equals("-1");
+            int textureOffsetX = won ? 0 : 416;
+            offsetX = 432 + (won ? -1 : (2 - levelString.length())) * 16;
+            for (j = 0; j < levelString.length(); j++) {
+                if (levelString.equals("-1")) // Se il giocatore ha completato tutti i livelli
+                    levelString = "WON";
+                int value = levelString.charAt(j) - (won ? 'A' : '0');
+                glBegin(GL_QUADS);
+                glTexCoord2d(((textureOffsetX + value * 16d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
         }
     }
 }
