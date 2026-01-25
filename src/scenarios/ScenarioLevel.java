@@ -1,10 +1,10 @@
 package scenarios;
 
 import entities.*;
-import game.Level;
-import game.LevelType;
-import game.Model;
+import game.*;
+import ui.AlphaNumInputKeys;
 import ui.Keyboard;
+import ui.SpamLockTime;
 import utils.PointD;
 import utils.Textures;
 
@@ -16,7 +16,8 @@ public class ScenarioLevel extends Scenario {
     private final static int FIGURE_SPEED = 6;
     private final static int MAX_FIGURE_NUMBER = 300;
 
-    protected final Player player;
+    private final ModelScore modelScore;
+    private final Player player;
     private double figureNumber;
     private double movingEntitiesFigureNumber;
     private double softPauseFigureNumber;
@@ -25,8 +26,9 @@ public class ScenarioLevel extends Scenario {
     private boolean showPlayer;
     private boolean pauseTrigger;
 
-    public ScenarioLevel(Model model, Textures textures) {
+    public ScenarioLevel(Model model, ModelScore modelScore, Textures textures) {
         this.model = model;
+        this.modelScore = modelScore;
         this.textures = textures;
         player = model.getPlayer();
         figureNumber = 0;
@@ -39,6 +41,37 @@ public class ScenarioLevel extends Scenario {
     @Override
     public void commands(double deltaT) {
         LevelType levelType = model.getCurrentLevel().getLevelType();
+
+        if (model.isWaitingForCommand()) {
+            if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
+                setSoftPaused();
+                model.reset();
+            } else return;
+        }
+
+        // Se il giocatore ha fatto un nuovo punteggio migliore
+        if (model.isNewHighScore()) {
+            handleNewScorePrompt(modelScore::type);
+            if (Keyboard.isKeyDown(GLFW_KEY_ENTER)) {
+                modelScore.persistScoreTable();
+                setSoftPaused();
+                model.reset();
+            }
+            return;
+        }
+
+        // Se il giocatore ha terminato la partita
+        if (model.isGameFinished()) {
+            if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
+                if (modelScore.isValidCandidate(player.getScore())) {
+                    modelScore.insertNew(new ScoreEntry("", player.getScore(), model.getCurrentLevel().getNumber()));
+                    model.setNewHighScore(true);
+                } else {
+                    Keyboard.spamLock(SpamLockTime.Long);
+                    model.setWaitCommand();
+                }
+            } else return;
+        }
 
         // Se il livello è un livello di transizione, forza la camminata verso destra
         if (levelType == LevelType.TRANSITION_LEVEL || levelType == LevelType.TRANSITION_FROM_WARPZONE) {
@@ -306,12 +339,7 @@ public class ScenarioLevel extends Scenario {
                 player.setSpeedY(Player.JUMP_POWER);
 
             // Player has passed level
-            if (player.hasPassedLevel()) {
-                if (model.getCurrentLevel().getNext() != null)
-                    model.nextLevel();
-                else
-                    model.reset();
-            }
+            if (player.hasPassedLevel()) model.nextLevel();
         }
     }
 
@@ -328,181 +356,29 @@ public class ScenarioLevel extends Scenario {
                     model.getCurrentLevel().getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
             player.setLocation(spawnpoint);
             player.restart();
-        } else
-            model.reset();
+        } else model.setGameFinished(true);
         setSoftPaused();
     }
 
     @Override
     public void render(double deltaT) {
-        int i;
         double viewport;
         PointD playerLocation;
         int levelWidth;
         int figureNumber = (int) this.figureNumber;
         int movingEntitiesFigureNumber = (int) this.movingEntitiesFigureNumber;
+        Level level = model.getCurrentLevel();
 
-        levelWidth = model.getCurrentLevel().getWidth() * 32;
+        levelWidth = level.getWidth() * 32;
         playerLocation = player.getLocation();
         if (playerLocation.x < 320)
             viewport = 0;
-        else if (playerLocation.x > model.getCurrentLevel().getWidth() * 32 - 320)
-            viewport = model.getCurrentLevel().getWidth() * 32 - 640;
+        else if (playerLocation.x > level.getWidth() * 32 - 320)
+            viewport = level.getWidth() * 32 - 640;
         else
             viewport = playerLocation.x - 320;
-
-        // Punteggio
-        for (i = 0; i < 7; i++) {
-            int digit;
-            digit = player.getScore() / (int) Math.pow(10, 6 - i) % 10;
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d((16d * digit) / 896, (94d / 290));
-            glVertex2d((114d + 16 * i) / 640, (2d / 400));
-            glTexCoord2d((16d * digit + 16) / 896, (94d / 290));
-            glVertex2d((130d + 16 * i) / 640, (2d / 400));
-            glTexCoord2d((16d * digit + 16) / 896, (114d / 290));
-            glVertex2d((130d + 16 * i) / 640, (22d / 400));
-            glTexCoord2d((16d * digit) / 896, (114d / 290));
-            glVertex2d((114d + 16 * i) / 640, (22d / 400));
-            glEnd();
-        }
-
-        // Numero livello
-        for (i = 0; i < 2; i++) {
-            int digit;
-
-            digit = model.getCurrentLevel().getNumber() / (int) Math.pow(10, 1 - i) % 10;
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d((16d * digit) / 896, (94d / 290));
-            glVertex2d((352d + 16 * i) / 640, (2d / 400));
-            glTexCoord2d((16d * digit + 16) / 896, (94d / 290));
-            glVertex2d((368d + 16 * i) / 640, (2d / 400));
-            glTexCoord2d((16d * digit + 16) / 896, (114d / 290));
-            glVertex2d((368d + 16 * i) / 640, (22d / 400));
-            glTexCoord2d((16d * digit) / 896, (114d / 290));
-            glVertex2d((352d + 16 * i) / 640, (22d / 400));
-            glEnd();
-        }
-
-        // Vite rimanenti
-        Textures.bindTexture(textures.getTextureGameParts());
-        for (i = 0; i < player.getLives(); i++) {
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (216d / 290));
-            glVertex2d(((512d + i * 32) / 640), 0);
-            glTexCoord2d((32d / 896), (216d / 290));
-            glVertex2d(((544d + i * 32) / 640), 0);
-            glTexCoord2d((32d / 896), (240d / 290));
-            glVertex2d(((544d + i * 32) / 640), (24d / 400));
-            glTexCoord2d(0, (240d / 290));
-            glVertex2d(((512d + i * 32) / 640), (24d / 400));
-            glEnd();
-        }
-
-        // Jetpack
-        if (player.getJetpackValue() > 0) {
-            // Scritta
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (114d / 290));
-            glVertex2d(0, (340d / 400));
-            glTexCoord2d((124d / 896), (114d / 290));
-            glVertex2d((124d / 640), (340d / 400));
-            glTexCoord2d((124d / 896), (136d / 290));
-            glVertex2d((124d / 640), (362d / 400));
-            glTexCoord2d(0, (136d / 290));
-            glVertex2d(0, (362d / 400));
-            glEnd();
-            // Frame energia rimanente
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (184d / 290));
-            glVertex2d((144d / 640), (340d / 400));
-            glTexCoord2d((256d / 896), (184d / 290));
-            glVertex2d((400d / 640), (340d / 400));
-            glTexCoord2d((256d / 896), (208d / 290));
-            glVertex2d((400d / 640), (364d / 400));
-            glTexCoord2d(0, (208d / 290));
-            glVertex2d((144d / 640), (364d / 400));
-            glEnd();
-            // Energia rimanente
-            for (i = 0; i < player.getJetpackValue(); i++) {
-                Textures.bindTexture(textures.getTextureGameParts());
-                glBegin(GL_QUADS);
-                glTexCoord2d(0, (208d / 290));
-                glVertex2d(((152d + i * 4) / 640), (348d / 400));
-                glTexCoord2d((4d / 896), (208d / 290));
-                glVertex2d(((156d + i * 4) / 640), (348d / 400));
-                glTexCoord2d((4d / 896), (216d / 290));
-                glVertex2d(((156d + i * 4) / 640), (356d / 400));
-                glTexCoord2d(0, (216d / 290));
-                glVertex2d(((152d + i * 4) / 640), (356d / 400));
-                glEnd();
-            }
-        }
-
-        // Pistola
-        if (player.getIfHasGun()) {
-            // Scritta
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (136d / 290));
-            glVertex2d((480d / 640), (340d / 400));
-            glTexCoord2d((54d / 896), (136d / 290));
-            glVertex2d((534d / 640), (340d / 400));
-            glTexCoord2d((54d / 896), (158d / 290));
-            glVertex2d((534d / 640), (362d / 400));
-            glTexCoord2d(0, (158d / 290));
-            glVertex2d((480d / 640), (362d / 400));
-            glEnd();
-            // Icona
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (240d / 290));
-            glVertex2d((572d / 640), (340d / 400));
-            glTexCoord2d((32d / 896), (240d / 290));
-            glVertex2d((604d / 640), (340d / 400));
-            glTexCoord2d((32d / 896), (262d / 290));
-            glVertex2d((604d / 640), (362d / 400));
-            glTexCoord2d(0, (262d / 290));
-            glVertex2d((572d / 640), (362d / 400));
-            glEnd();
-        }
-
-        // Coppa
-        if (player.getIfHasTrophy()) {
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d(0, (158d / 290));
-            glVertex2d((146d / 640), (370d / 400));
-            glTexCoord2d((340d / 896), (158d / 290));
-            glVertex2d((486d / 640), (370d / 400));
-            glTexCoord2d((340d / 896), (184d / 290));
-            glVertex2d((486d / 640), (396d / 400));
-            glTexCoord2d(0, (184d / 290));
-            glVertex2d((146d / 640), (396d / 400));
-            glEnd();
-        }
-
-        // Pausa
-        if (paused) {
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glTexCoord2d((56d / 896), (136d / 290));
-            glVertex2d((500d / 640), (370d / 400));
-            glTexCoord2d((160d / 896), (136d / 290));
-            glVertex2d((604d / 640), (370d / 400));
-            glTexCoord2d((160d / 896), (158d / 290));
-            glVertex2d((604d / 640), (392d / 400));
-            glTexCoord2d((56d / 896), (158d / 290));
-            glVertex2d((500d / 640), (392d / 400));
-            glEnd();
-        }
-
         // Livello attuale
-        Textures.bindTexture(model.getCurrentLevel().getTexture());
+        Textures.bindTexture(level.getTexture());
         glBegin(GL_QUADS);
         glTexCoord2d((viewport / levelWidth), 0);
         glVertex2d(0, (32d / 400));
@@ -524,211 +400,421 @@ public class ScenarioLevel extends Scenario {
         endX = Math.min((int) viewport / 32 + 25, levelWidth / 32);
 
         // Entità ferme
-        for (i = startX; i < endX; i++)
-            drawEntities(model.getCurrentLevel().getEntities()[i], viewport);
+        for (int i = startX; i < endX; i++)
+            drawEntities(level.getEntities()[i], viewport);
 
-        // Entità mobili
-        for (MovingEntity entity : model.getCurrentLevel().getMovingEntities()) {
-            int textureNumber;
-            double limitYTexture, limitY;
+        // Schermata di fine gioco
+        if (level.getLevelType() == LevelType.ENDGAME) {
+            Textures.bindTexture(textures.getTextureScoreParts());
+            glBegin(GL_QUADS);
+            glTexCoord2d(0, 0);
+            glVertex2d((48d / 640), (64d / 400));
+            glTexCoord2d((560d / 640), 0);
+            glVertex2d((608d / 640), (64d / 400));
+            glTexCoord2d((560d / 640), (256d / 596));
+            glVertex2d((608d / 640), (320d / 400));
+            glTexCoord2d(0, (256d / 596));
+            glVertex2d((48d / 640), (320d / 400));
+            glEnd();
+        } else {
+            // Punteggio
+            for (int i = 0; i < 7; i++) {
+                int digit;
+                digit = player.getScore() / (int) Math.pow(10, 6 - i) % 10;
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d((16d * digit) / 896, (94d / 290));
+                glVertex2d((114d + 16 * i) / 640, (2d / 400));
+                glTexCoord2d((16d * digit + 16) / 896, (94d / 290));
+                glVertex2d((130d + 16 * i) / 640, (2d / 400));
+                glTexCoord2d((16d * digit + 16) / 896, (114d / 290));
+                glVertex2d((130d + 16 * i) / 640, (22d / 400));
+                glTexCoord2d((16d * digit) / 896, (114d / 290));
+                glVertex2d((114d + 16 * i) / 640, (22d / 400));
+                glEnd();
+            }
 
-            if (entity.isVisible()) {
-                textureNumber = (movingEntitiesFigureNumber / FIGURE_SPEED) % entity.getFiguresNumber();
-                limitY = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32) / 400;
-                limitYTexture = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? (entity.getTextureY() + entity.getHeight() - (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 - 332)) / entity.getTextureHeight() : (entity.getTextureY() + entity.getHeight()) / entity.getTextureHeight();
-                Textures.bindTexture(entity.getTexture());
-                if (entity.isAlive()) {
+            // Numero livello
+            for (int i = 0; i < 2; i++) {
+                int digit;
+
+                digit = level.getNumber() / (int) Math.pow(10, 1 - i) % 10;
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d((16d * digit) / 896, (94d / 290));
+                glVertex2d((352d + 16 * i) / 640, (2d / 400));
+                glTexCoord2d((16d * digit + 16) / 896, (94d / 290));
+                glVertex2d((368d + 16 * i) / 640, (2d / 400));
+                glTexCoord2d((16d * digit + 16) / 896, (114d / 290));
+                glVertex2d((368d + 16 * i) / 640, (22d / 400));
+                glTexCoord2d((16d * digit) / 896, (114d / 290));
+                glVertex2d((352d + 16 * i) / 640, (22d / 400));
+                glEnd();
+            }
+
+            // Vite rimanenti
+            Textures.bindTexture(textures.getTextureGameParts());
+            for (int i = 0; i < player.getLives(); i++) {
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (216d / 290));
+                glVertex2d(((512d + i * 32) / 640), 0);
+                glTexCoord2d((32d / 896), (216d / 290));
+                glVertex2d(((544d + i * 32) / 640), 0);
+                glTexCoord2d((32d / 896), (240d / 290));
+                glVertex2d(((544d + i * 32) / 640), (24d / 400));
+                glTexCoord2d(0, (240d / 290));
+                glVertex2d(((512d + i * 32) / 640), (24d / 400));
+                glEnd();
+            }
+
+            // Jetpack
+            if (player.getJetpackValue() > 0) {
+                // Scritta
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (114d / 290));
+                glVertex2d(0, (340d / 400));
+                glTexCoord2d((124d / 896), (114d / 290));
+                glVertex2d((124d / 640), (340d / 400));
+                glTexCoord2d((124d / 896), (136d / 290));
+                glVertex2d((124d / 640), (362d / 400));
+                glTexCoord2d(0, (136d / 290));
+                glVertex2d(0, (362d / 400));
+                glEnd();
+                // Frame energia rimanente
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (184d / 290));
+                glVertex2d((144d / 640), (340d / 400));
+                glTexCoord2d((256d / 896), (184d / 290));
+                glVertex2d((400d / 640), (340d / 400));
+                glTexCoord2d((256d / 896), (208d / 290));
+                glVertex2d((400d / 640), (364d / 400));
+                glTexCoord2d(0, (208d / 290));
+                glVertex2d((144d / 640), (364d / 400));
+                glEnd();
+                // Energia rimanente
+                for (int i = 0; i < player.getJetpackValue(); i++) {
+                    Textures.bindTexture(textures.getTextureGameParts());
                     glBegin(GL_QUADS);
-                    glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
-                    glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
-                    glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
-                    glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
-                    glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
-                    glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, limitY);
-                    glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
-                    glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, limitY);
+                    glTexCoord2d(0, (208d / 290));
+                    glVertex2d(((152d + i * 4) / 640), (348d / 400));
+                    glTexCoord2d((4d / 896), (208d / 290));
+                    glVertex2d(((156d + i * 4) / 640), (348d / 400));
+                    glTexCoord2d((4d / 896), (216d / 290));
+                    glVertex2d(((156d + i * 4) / 640), (356d / 400));
+                    glTexCoord2d(0, (216d / 290));
+                    glVertex2d(((152d + i * 4) / 640), (356d / 400));
                     glEnd();
+                }
+            }
+
+            // Pistola
+            if (player.getIfHasGun()) {
+                // Scritta
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (136d / 290));
+                glVertex2d((480d / 640), (340d / 400));
+                glTexCoord2d((54d / 896), (136d / 290));
+                glVertex2d((534d / 640), (340d / 400));
+                glTexCoord2d((54d / 896), (158d / 290));
+                glVertex2d((534d / 640), (362d / 400));
+                glTexCoord2d(0, (158d / 290));
+                glVertex2d((480d / 640), (362d / 400));
+                glEnd();
+                // Icona
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (240d / 290));
+                glVertex2d((572d / 640), (340d / 400));
+                glTexCoord2d((32d / 896), (240d / 290));
+                glVertex2d((604d / 640), (340d / 400));
+                glTexCoord2d((32d / 896), (262d / 290));
+                glVertex2d((604d / 640), (362d / 400));
+                glTexCoord2d(0, (262d / 290));
+                glVertex2d((572d / 640), (362d / 400));
+                glEnd();
+            }
+
+            // Coppa
+            if (player.getIfHasTrophy()) {
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (158d / 290));
+                glVertex2d((146d / 640), (370d / 400));
+                glTexCoord2d((340d / 896), (158d / 290));
+                glVertex2d((486d / 640), (370d / 400));
+                glTexCoord2d((340d / 896), (184d / 290));
+                glVertex2d((486d / 640), (396d / 400));
+                glTexCoord2d(0, (184d / 290));
+                glVertex2d((146d / 640), (396d / 400));
+                glEnd();
+            }
+
+            // Pausa
+            if (paused) {
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d((56d / 896), (136d / 290));
+                glVertex2d((500d / 640), (370d / 400));
+                glTexCoord2d((160d / 896), (136d / 290));
+                glVertex2d((604d / 640), (370d / 400));
+                glTexCoord2d((160d / 896), (158d / 290));
+                glVertex2d((604d / 640), (392d / 400));
+                glTexCoord2d((56d / 896), (158d / 290));
+                glVertex2d((500d / 640), (392d / 400));
+                glEnd();
+            }
+
+            // Entità mobili
+            for (MovingEntity entity : level.getMovingEntities()) {
+                int textureNumber;
+                double limitYTexture, limitY;
+
+                if (entity.isVisible()) {
+                    textureNumber = (movingEntitiesFigureNumber / FIGURE_SPEED) % entity.getFiguresNumber();
+                    limitY = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32) / 400;
+                    limitYTexture = entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 > 332 ? (entity.getTextureY() + entity.getHeight() - (entity.getY() - OFFSET_Y * 32 + entity.getHeight() / 2 + 32 - 332)) / entity.getTextureHeight() : (entity.getTextureY() + entity.getHeight()) / entity.getTextureHeight();
+                    Textures.bindTexture(entity.getTexture());
+                    if (entity.isAlive()) {
+                        glBegin(GL_QUADS);
+                        glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
+                        glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
+                        glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), (entity.getTextureY()) / entity.getTextureHeight());
+                        glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, (entity.getY() - OFFSET_Y * 32 - entity.getHeight() / 2 + 32) / 400);
+                        glTexCoord2d((textureNumber * entity.getWidth() + entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
+                        glVertex2d((entity.getX() + entity.getWidth() / 2 - viewport) / 640, limitY);
+                        glTexCoord2d((textureNumber * entity.getWidth()) / entity.getTextureWidth(), limitYTexture);
+                        glVertex2d((entity.getX() - entity.getWidth() / 2 - viewport) / 640, limitY);
+                        glEnd();
+                    } else {
+                        glBegin(GL_QUADS);
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
+                        glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
+                        glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
+                        glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
+                        glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                        glEnd();
+                    }
+                    if (entity.getShoot().isVisible()) {
+                        Textures.bindTexture(textures.getTextureMovingEntities());
+                        glBegin(GL_QUADS);
+                        glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), (298d / 304));
+                        glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                        glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), (298d / 304));
+                        glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                        glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), 1);
+                        glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+                        glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), 1);
+                        glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+                        glEnd();
+                    }
+                }
+            }
+
+            // Giocatore
+            Textures.bindTexture(textures.getTextureMovingEntities());
+            if (!model.isGameFinished() && (!softPaused || showPlayer)) {
+                if (player.isAlive()) {
+                    double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
+                    double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
+                    if (cutBottom < 0) cutBottom = 0;
+                    if (cutTop < 0) cutTop = 0;
+                    if (cutBottom < 32 && cutTop < 32) {
+                        glBegin(GL_QUADS);
+                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                        glEnd();
+                    }
                 } else {
                     glBegin(GL_QUADS);
                     glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
+                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-                    glVertex2d(((entity.getX() + 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
                     glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-                    glVertex2d(((entity.getX() - 20 - viewport) / 640), ((entity.getY() - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-                    glEnd();
-                }
-                if (entity.getShoot().isVisible()) {
-                    Textures.bindTexture(textures.getTextureMovingEntities());
-                    glBegin(GL_QUADS);
-                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), (298d / 304));
-                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), (298d / 304));
-                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40) + 40) / 720), 1);
-                    glVertex2d(((entity.getShoot().getX() + 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
-                    glTexCoord2d((((entity.getShoot().getDirection() == Directions.RIGHT ? 0 : 120d) + (figureNumber / 5 % 3 * 40)) / 720), 1);
-                    glVertex2d(((entity.getShoot().getX() - 20 - viewport) / 640), ((entity.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
                     glEnd();
                 }
             }
-        }
 
-        // Giocatore
-        Textures.bindTexture(textures.getTextureMovingEntities());
-        if (!softPaused || showPlayer) {
-            if (player.isAlive()) {
-                double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
-                double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
-                if (cutBottom < 0) cutBottom = 0;
-                if (cutTop < 0) cutTop = 0;
-                if (cutBottom < 32 && cutTop < 32) {
-                    glBegin(GL_QUADS);
-                    glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
-                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                    glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
-                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                    glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
-                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
-                    glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
-                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
-                    glEnd();
-                }
-            } else {
+            // Sparo del giocatore
+            if (player.getShoot().isVisible()) {
+                Textures.bindTexture(textures.getTextureMovingEntities());
                 glBegin(GL_QUADS);
-                glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-                glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-                glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-                glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-                glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-                glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (292d / 304));
+                glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (292d / 304));
+                glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
+                glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (298d / 304));
+                glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
+                glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (298d / 304));
+                glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
                 glEnd();
             }
-        }
 
-        // Sparo del giocatore
-        if (player.getShoot().isVisible()) {
-            Textures.bindTexture(textures.getTextureMovingEntities());
-            glBegin(GL_QUADS);
-            glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (292d / 304));
-            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
-            glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (292d / 304));
-            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 - 3 + 32) / 400));
-            glTexCoord2d((((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) + 16) / 720), (298d / 304));
-            glVertex2d(((player.getShoot().getX() + 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
-            glTexCoord2d(((player.getShoot().getDirection() == Directions.RIGHT ? 0 : 16d) / 720), (298d / 304));
-            glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
-            glEnd();
-        }
-
-        // Scritte dei livelli di transizione nuovo livello
-        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_LEVEL) {
-            Textures.bindTexture(textures.getTextureLevelsLeft());
-            if (model.getRemainingLevels() == 0) { // Finito il gioco
-                glBegin(GL_QUADS);
-                glTexCoord2d(0, (20d / 40));
-                glVertex2d((112d / 640), (114d / 400));
-                glTexCoord2d((432d / 480), (20d / 40));
-                glVertex2d((544d / 640), (114d / 400));
-                glTexCoord2d((432d / 480), (30d / 40));
-                glVertex2d((544d / 640), (124d / 400));
-                glTexCoord2d(0, (30d / 40));
-                glVertex2d((112d / 640), (124d / 400));
-                glEnd();
-            } else if (model.getRemainingLevels() == 1) { // Verso ultimo livello
-                glBegin(GL_QUADS);
-                glTexCoord2d(0, (10d / 40));
-                glVertex2d((128d / 640), (114d / 400));
-                glTexCoord2d((400d / 480), (10d / 40));
-                glVertex2d((528d / 640), (114d / 400));
-                glTexCoord2d((400d / 480), (20d / 40));
-                glVertex2d((528d / 640), (124d / 400));
-                glTexCoord2d(0, (20d / 40));
-                glVertex2d((128d / 640), (124d / 400));
-                glEnd();
-            } else { // Livello normale
-                glBegin(GL_QUADS);
-                glTexCoord2d(0, 0);
-                glVertex2d((80d / 640), (114d / 400));
-                glTexCoord2d(1, 0);
-                glVertex2d((560d / 640), (114d / 400));
-                glTexCoord2d(1, (10d / 40));
-                glVertex2d((560d / 640), (124d / 400));
-                glTexCoord2d(0, (10d / 40));
-                glVertex2d((80d / 640), (124d / 400));
-                glEnd();
-
-                // Numero del livello (unità)
-                int levelUnit = model.getRemainingLevels() % 10 - 1;
-                glBegin(GL_QUADS);
-                glTexCoord2d((16d * levelUnit / 480), (30d / 40));
-                glVertex2d((352d / 640), (114d / 400));
-                glTexCoord2d((16d * (levelUnit + 1) / 480), (30d / 40));
-                glVertex2d((368d / 640), (114d / 400));
-                glTexCoord2d((16d * (levelUnit + 1) / 480), 1);
-                glVertex2d((368d / 640), (124d / 400));
-                glTexCoord2d((16d * levelUnit / 480), 1);
-                glVertex2d((352d / 640), (124d / 400));
-                glEnd();
-
-                // Decina (numero a due cifre)
-                if (model.getRemainingLevels() > 9) {
-                    int levelDigit = model.getRemainingLevels() / 10 - 1;
+            // Scritte dei livelli di transizione nuovo livello
+            if (level.getLevelType() == LevelType.TRANSITION_LEVEL) {
+                Textures.bindTexture(textures.getTextureLevelsLeft());
+                if (model.getRemainingLevels() == 0) { // Finito il gioco
                     glBegin(GL_QUADS);
-                    glTexCoord2d((16d * levelDigit / 480), (30d / 40));
-                    glVertex2d((336d / 640), (114d / 400));
-                    glTexCoord2d((16d * (levelDigit + 1) / 480), (30d / 40));
+                    glTexCoord2d(0, (20d / 40));
+                    glVertex2d((112d / 640), (114d / 400));
+                    glTexCoord2d((432d / 480), (20d / 40));
+                    glVertex2d((544d / 640), (114d / 400));
+                    glTexCoord2d((432d / 480), (30d / 40));
+                    glVertex2d((544d / 640), (124d / 400));
+                    glTexCoord2d(0, (30d / 40));
+                    glVertex2d((112d / 640), (124d / 400));
+                    glEnd();
+                } else if (model.getRemainingLevels() == 1) { // Verso ultimo livello
+                    glBegin(GL_QUADS);
+                    glTexCoord2d(0, (10d / 40));
+                    glVertex2d((128d / 640), (114d / 400));
+                    glTexCoord2d((400d / 480), (10d / 40));
+                    glVertex2d((528d / 640), (114d / 400));
+                    glTexCoord2d((400d / 480), (20d / 40));
+                    glVertex2d((528d / 640), (124d / 400));
+                    glTexCoord2d(0, (20d / 40));
+                    glVertex2d((128d / 640), (124d / 400));
+                    glEnd();
+                } else { // Livello normale
+                    glBegin(GL_QUADS);
+                    glTexCoord2d(0, 0);
+                    glVertex2d((80d / 640), (114d / 400));
+                    glTexCoord2d(1, 0);
+                    glVertex2d((560d / 640), (114d / 400));
+                    glTexCoord2d(1, (10d / 40));
+                    glVertex2d((560d / 640), (124d / 400));
+                    glTexCoord2d(0, (10d / 40));
+                    glVertex2d((80d / 640), (124d / 400));
+                    glEnd();
+
+                    // Numero del livello (unità)
+                    int levelUnit = model.getRemainingLevels() % 10 - 1;
+                    glBegin(GL_QUADS);
+                    glTexCoord2d((16d * levelUnit / 480), (30d / 40));
                     glVertex2d((352d / 640), (114d / 400));
-                    glTexCoord2d((16d * (levelDigit + 1) / 480), 1);
+                    glTexCoord2d((16d * (levelUnit + 1) / 480), (30d / 40));
+                    glVertex2d((368d / 640), (114d / 400));
+                    glTexCoord2d((16d * (levelUnit + 1) / 480), 1);
+                    glVertex2d((368d / 640), (124d / 400));
+                    glTexCoord2d((16d * levelUnit / 480), 1);
                     glVertex2d((352d / 640), (124d / 400));
-                    glTexCoord2d((16d * levelDigit / 480), 1);
-                    glVertex2d((336d / 640), (124d / 400));
                     glEnd();
+
+                    // Decina (numero a due cifre)
+                    if (model.getRemainingLevels() > 9) {
+                        int levelDigit = model.getRemainingLevels() / 10 - 1;
+                        glBegin(GL_QUADS);
+                        glTexCoord2d((16d * levelDigit / 480), (30d / 40));
+                        glVertex2d((336d / 640), (114d / 400));
+                        glTexCoord2d((16d * (levelDigit + 1) / 480), (30d / 40));
+                        glVertex2d((352d / 640), (114d / 400));
+                        glTexCoord2d((16d * (levelDigit + 1) / 480), 1);
+                        glVertex2d((352d / 640), (124d / 400));
+                        glTexCoord2d((16d * levelDigit / 480), 1);
+                        glVertex2d((336d / 640), (124d / 400));
+                        glEnd();
+                    }
                 }
             }
-        }
 
-        // Scritte dei livelli di transizione verso warpzone
-        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_WARPZONE) {
-            Textures.bindTexture(textures.getTextureGameParts());
+            // Scritte dei livelli di transizione verso warpzone
+            if (level.getLevelType() == LevelType.TRANSITION_WARPZONE) {
+                Textures.bindTexture(textures.getTextureGameParts());
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (262d / 290));
+                glVertex2d((70d / 640), (170d / 400));
+                glTexCoord2d((142d / 896), (262d / 290));
+                glVertex2d((212d / 640), (170d / 400));
+                glTexCoord2d((142d / 896), 1);
+                glVertex2d((212d / 640), (198d / 400));
+                glTexCoord2d(0, 1);
+                glVertex2d((70d / 640), (198d / 400));
+                glEnd();
+                glBegin(GL_QUADS);
+                glTexCoord2d((142d / 896), (262d / 290));
+                glVertex2d((394d / 640), (170d / 400));
+                glTexCoord2d((272d / 896), (262d / 290));
+                glVertex2d((524d / 640), (170d / 400));
+                glTexCoord2d((272d / 896), 1);
+                glVertex2d((524d / 640), (198d / 400));
+                glTexCoord2d((142d / 896), 1);
+                glVertex2d((394d / 640), (198d / 400));
+                glEnd();
+            }
+
+            // Sfondo
+            Textures.bindTexture(textures.getTextureBackground());
             glBegin(GL_QUADS);
-            glTexCoord2d(0, (262d / 290));
-            glVertex2d((70d / 640), (170d / 400));
-            glTexCoord2d((142d / 896), (262d / 290));
-            glVertex2d((212d / 640), (170d / 400));
-            glTexCoord2d((142d / 896), 1);
-            glVertex2d((212d / 640), (198d / 400));
+            glTexCoord2d(0, 0);
+            glVertex2d(0, 0);
+            glTexCoord2d(1, 0);
+            glVertex2d(1, 0);
+            glTexCoord2d(1, 1);
+            glVertex2d(1, 1);
             glTexCoord2d(0, 1);
-            glVertex2d((70d / 640), (198d / 400));
-            glEnd();
-            glBegin(GL_QUADS);
-            glTexCoord2d((142d / 896), (262d / 290));
-            glVertex2d((394d / 640), (170d / 400));
-            glTexCoord2d((272d / 896), (262d / 290));
-            glVertex2d((524d / 640), (170d / 400));
-            glTexCoord2d((272d / 896), 1);
-            glVertex2d((524d / 640), (198d / 400));
-            glTexCoord2d((142d / 896), 1);
-            glVertex2d((394d / 640), (198d / 400));
+            glVertex2d(0, 1);
             glEnd();
         }
 
-        // Sfondo
-        Textures.bindTexture(textures.getTextureBackground());
-        glBegin(GL_QUADS);
-        glTexCoord2d(0, 0);
-        glVertex2d(0, 0);
-        glTexCoord2d(1, 0);
-        glVertex2d(1, 0);
-        glTexCoord2d(1, 1);
-        glVertex2d(1, 1);
-        glTexCoord2d(0, 1);
-        glVertex2d(0, 1);
-        glEnd();
+        if (model.isGameFinished()) {
+            Textures.bindTexture(textures.getTextureScoreParts());
+            if (model.isNewHighScore() || model.isWaitingForCommand()) {
+                // Disegna tabella punteggi
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (300d / 596));
+                glVertex2d((114d / 640), (82d / 400));
+                glTexCoord2d((428d / 640), (300d / 596));
+                glVertex2d((542d / 640), (82d / 400));
+                glTexCoord2d((428d / 640), (536d / 596));
+                glVertex2d((542d / 640), (318d / 400));
+                glTexCoord2d(0, (536d / 596));
+                glVertex2d((114d / 640), (318d / 400));
+                glEnd();
+
+                // Disegna tutti i punteggi
+                drawScoreTable();
+            }
+            if (model.isNewHighScore()) {
+                // Disegna "NEW HIGH SCORE"
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (536d / 596));
+                glVertex2d(0, (354d / 400));
+                glTexCoord2d(1, (536d / 596));
+                glVertex2d(1, (354d / 400));
+                glTexCoord2d(1, (580d / 596));
+                glVertex2d(1, (398d / 400));
+                glTexCoord2d(0, (580d / 596));
+                glVertex2d(0, (398d / 400));
+                glEnd();
+            } else if (model.getCurrentLevel().getLevelType() != LevelType.ENDGAME) {
+                // Disegna "GAME OVER"
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (256d / 596));
+                glVertex2d(0, (354d / 400));
+                glTexCoord2d(1, (256d / 596));
+                glVertex2d(1, (354d / 400));
+                glTexCoord2d(1, (300d / 596));
+                glVertex2d(1, (398d / 400));
+                glTexCoord2d(0, (300d / 596));
+                glVertex2d(0, (398d / 400));
+                glEnd();
+            }
+        }
     }
 
     private void drawEntities(EntityChain entities, double viewport) {
@@ -756,6 +842,110 @@ public class ScenarioLevel extends Scenario {
                 glEnd();
             }
             drawEntities(entities.getNext(), viewport);
+        }
+    }
+
+    interface NewScorePrompt {
+        void prompt(String entry, boolean cancel);
+    }
+
+    private void handleNewScorePrompt(NewScorePrompt callback) {
+        if (!Keyboard.isAvailable()) return;
+        String playerName = modelScore.getPlayerName();
+        if (Keyboard.isKeyDown(GLFW_KEY_BACKSPACE) && !playerName.isEmpty()) {
+            callback.prompt(null, true);
+            Keyboard.spamLock(SpamLockTime.Short);
+        } else {
+            if (playerName.length() == 3) return;
+            Keyboard.spamLock(SpamLockTime.Short);
+            for (int i = 0; i < AlphaNumInputKeys.keys.length; i++)
+                if (Keyboard.isKeyDown(AlphaNumInputKeys.keys[i])) {
+                    callback.prompt(AlphaNumInputKeys.values.substring(i, i + 1), false);
+                    return;
+                }
+        }
+    }
+
+    private void drawScoreTable() {
+        ScoreEntry entry;
+        String playerName;
+        String scoreString;
+        String levelString;
+        int offsetX, offsetY, j;
+
+        for (int i = 0; i < modelScore.getScoreTable().size(); i++) {
+            offsetY = 32 * i;
+            entry = modelScore.getScoreTable().get(i);
+            playerName = entry.getPlayerName();
+            scoreString = "" + entry.getScore();
+            levelString = "" + entry.getLevel();
+
+            // Disegna punteggio
+            offsetX = 176 + (6 - scoreString.length()) * 16;
+            for (j = 0; j < scoreString.length(); j++) {
+                int value = scoreString.charAt(j) - '0';
+                glBegin(GL_QUADS);
+                glTexCoord2d(((416d + value * 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16 + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16 + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((416d + value * 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+
+            // Disegna nome
+            offsetX = 304;
+            for (j = 0; j < playerName.length(); j++) {
+                int value = playerName.charAt(j)
+                        + (Character.isDigit(playerName.charAt(j)) ? -'0' + 26 : -'A');
+                glBegin(GL_QUADS);
+                glTexCoord2d(((value * 16d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((value * 16d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((value * 16d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((value * 16d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+            // Disegna il cursore
+            int figureNumber = ((int) (this.figureNumber / 5)) % 4;
+            if (modelScore.getCurrentIndex() == i) {
+                glBegin(GL_QUADS);
+                glTexCoord2d(((figureNumber * 16 + 576d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((figureNumber * 16 + 576d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
+
+            // Disegna livello
+            boolean won = levelString.equals("-1");
+            int textureOffsetX = won ? 0 : 416;
+            offsetX = 432 + (won ? -1 : (2 - levelString.length())) * 16;
+            for (j = 0; j < levelString.length(); j++) {
+                if (levelString.equals("-1")) // Se il giocatore ha completato tutti i livelli
+                    levelString = "WON";
+                int value = levelString.charAt(j) - (won ? 'A' : '0');
+                glBegin(GL_QUADS);
+                glTexCoord2d(((textureOffsetX + value * 16d) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d + 16) / 640), (580d / 596));
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((160d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d + 16) / 640), 1);
+                glVertex2d(((offsetX + j * 16d + 16) / 640), ((176d + offsetY) / 400));
+                glTexCoord2d(((textureOffsetX + value * 16d) / 640), 1);
+                glVertex2d(((offsetX + j * 16d) / 640), ((176d + offsetY) / 400));
+                glEnd();
+            }
         }
     }
 }

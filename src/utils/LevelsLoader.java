@@ -169,12 +169,15 @@ public class LevelsLoader {
     }
 
     private Level consumeLogicalLevel(HashMap<Integer, LogicalLevel> structure, LogicalLevel logicalLevel, int number) {
-        levelsCount += 1;
-
         // Livello
         Level level = logicalLevel.level;
+        if (logicalLevel.nextLevelId == -1) {
+            level.setLevelType(LevelType.ENDGAME);
+            return level;
+        }
         level.setLevelType(LevelType.LEVEL);
         level.setNumber(number);
+        levelsCount += 1;
 
         // Transizione di livello
         LogicalLevel logicalTransitionLevel = structure.get(logicalLevel.nextLevelId);
