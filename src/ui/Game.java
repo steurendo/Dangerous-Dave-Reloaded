@@ -1,6 +1,7 @@
 package ui;
 
 import game.Model;
+import game.ModelScore;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -23,8 +24,6 @@ public class Game {
     private int windowH;
     private GLFWKeyCallback input;
     private Model model;
-    private Scenario scenarioLevel;
-    private Scenario scenarioScore;
     private Scenario[] switchScenario;
     private boolean active;
 
@@ -84,9 +83,9 @@ public class Game {
             Textures textures = new Textures();
             model = new Model(textures);
             Scenario scenarioMenu = new ScenarioMenu(model, textures);
-            scenarioLevel = new ScenarioLevel(model, textures);
-            scenarioScore = new ScenarioScore(model, textures);
-            switchScenario = new Scenario[]{scenarioMenu, scenarioLevel, scenarioScore};
+            ModelScore modelScore = new ModelScore();
+            Scenario scenarioLevel = new ScenarioLevel(model, modelScore, textures);
+            switchScenario = new Scenario[]{scenarioMenu, scenarioLevel};
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -121,5 +120,6 @@ public class Game {
         glfwDestroyWindow(window);
         glfwTerminate();
         input.free();
+        System.exit(0);
     }
 }

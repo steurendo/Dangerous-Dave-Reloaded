@@ -6,21 +6,44 @@ import utils.LevelsLoader;
 import utils.PointD;
 import utils.Textures;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Model {
+    private boolean canStart;
     private final Level levelsRoot;
     private Level currentLevel;
     private final Player player;
     private int state;
     private final int levelsCount;
+    private boolean gameFinished;
+    private boolean newHighScore;
 
     public Model(Textures textures) {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
+//        levelsRoot = loader.loadLevelsStructure().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext().getNext();
         levelsRoot = loader.loadLevelsStructure();
         levelsCount = loader.getLevelsCount();
         currentLevel = levelsRoot;
         player = new Player();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
+        gameFinished = false;
+        canStart = false;
+        newHighScore = false;
+        prepareForStart();
+    }
+
+    public boolean canStart() {
+        return canStart;
+    }
+
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
+    }
+
+    public boolean isGameFinished() {
+        return currentLevel.getLevelType() == LevelType.ENDGAME || gameFinished;
     }
 
     public int getState() {
@@ -39,6 +62,15 @@ public class Model {
         return levelsCount - currentLevel.getNumber();
     }
 
+    private void prepareForStart() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                canStart = true;
+            }
+        }, 500);
+    }
+
     public void reset() {
         state = 0;
         player.reset();
@@ -49,10 +81,22 @@ public class Model {
                 currentLevel.getSpawnpoint().x * 32 + 16,
                 currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
         player.setLocation(spawnpoint);
+        gameFinished = false;
+        canStart = false;
+        newHighScore = false;
+        prepareForStart();
     }
 
     public void start() {
         state = 1;
+    }
+
+    public boolean isNewHighScore() {
+        return newHighScore;
+    }
+
+    public void setNewHighScore(boolean newHighScore) {
+        this.newHighScore = newHighScore;
     }
 
     public void nextLevel(Callback afterTransitionCallback) {

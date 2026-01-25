@@ -8,7 +8,7 @@ public class Player {
     public final static double WIDTH = 22;
     public final static double HEIGHT = 30;
     public final static double BOX_HEIGHT = 26;
-    public final static double SPEED_FAST = 2.2;
+    public final static double SPEED_FAST = 2.21;
     public final static double JUMP_POWER = -3.1;
     public final static int JUMP_COOLDOWN = 5;
     public final static double SPEED_SLOW = 1.6;
