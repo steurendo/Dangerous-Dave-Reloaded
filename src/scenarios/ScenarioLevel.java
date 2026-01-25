@@ -350,7 +350,8 @@ public class ScenarioLevel extends Scenario {
             viewport = model.getCurrentLevel().getWidth() * 32 - 640;
         else
             viewport = playerLocation.x - 320;
-        //PUNTEGGIO
+
+        // Punteggio
         for (i = 0; i < 7; i++) {
             int digit;
             digit = player.getScore() / (int) Math.pow(10, 6 - i) % 10;
@@ -366,7 +367,8 @@ public class ScenarioLevel extends Scenario {
             glVertex2d((114d + 16 * i) / 640, (22d / 400));
             glEnd();
         }
-        //NUMERO LIVELLO
+
+        // Numero livello
         for (i = 0; i < 2; i++) {
             int digit;
 
@@ -383,7 +385,8 @@ public class ScenarioLevel extends Scenario {
             glVertex2d((352d + 16 * i) / 640, (22d / 400));
             glEnd();
         }
-        //VITE
+
+        // Vite rimanenti
         Textures.bindTexture(textures.getTextureGameParts());
         for (i = 0; i < player.getLives(); i++) {
             glBegin(GL_QUADS);
@@ -397,9 +400,10 @@ public class ScenarioLevel extends Scenario {
             glVertex2d(((512d + i * 32) / 640), (24d / 400));
             glEnd();
         }
-        //JETPACK
+
+        // Jetpack
         if (player.getJetpackValue() > 0) {
-            //SCRITTA
+            // Scritta
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
             glTexCoord2d(0, (114d / 290));
@@ -411,7 +415,7 @@ public class ScenarioLevel extends Scenario {
             glTexCoord2d(0, (136d / 290));
             glVertex2d(0, (362d / 400));
             glEnd();
-            //BARRA
+            // Frame energia rimanente
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
             glTexCoord2d(0, (184d / 290));
@@ -423,7 +427,7 @@ public class ScenarioLevel extends Scenario {
             glTexCoord2d(0, (208d / 290));
             glVertex2d((144d / 640), (364d / 400));
             glEnd();
-            //VALORE
+            // Energia rimanente
             for (i = 0; i < player.getJetpackValue(); i++) {
                 Textures.bindTexture(textures.getTextureGameParts());
                 glBegin(GL_QUADS);
@@ -438,9 +442,10 @@ public class ScenarioLevel extends Scenario {
                 glEnd();
             }
         }
-        //PISTOLA
+
+        // Pistola
         if (player.getIfHasGun()) {
-            //SCRITTA
+            // Scritta
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
             glTexCoord2d(0, (136d / 290));
@@ -452,7 +457,7 @@ public class ScenarioLevel extends Scenario {
             glTexCoord2d(0, (158d / 290));
             glVertex2d((480d / 640), (362d / 400));
             glEnd();
-            //ICONA
+            // Icona
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
             glTexCoord2d(0, (240d / 290));
@@ -465,7 +470,8 @@ public class ScenarioLevel extends Scenario {
             glVertex2d((572d / 640), (362d / 400));
             glEnd();
         }
-        //COPPA
+
+        // Coppa
         if (player.getIfHasTrophy()) {
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
@@ -479,7 +485,8 @@ public class ScenarioLevel extends Scenario {
             glVertex2d((146d / 640), (396d / 400));
             glEnd();
         }
-        //PAUSA
+
+        // Pausa
         if (paused) {
             Textures.bindTexture(textures.getTextureGameParts());
             glBegin(GL_QUADS);
@@ -493,7 +500,8 @@ public class ScenarioLevel extends Scenario {
             glVertex2d((500d / 640), (392d / 400));
             glEnd();
         }
-        //LIVELLO
+
+        // Livello attuale
         Textures.bindTexture(model.getCurrentLevel().getTexture());
         glBegin(GL_QUADS);
         glTexCoord2d((viewport / levelWidth), 0);
@@ -505,7 +513,8 @@ public class ScenarioLevel extends Scenario {
         glTexCoord2d((viewport / levelWidth), (300d / 320));
         glVertex2d(0, (332d / 400));
         glEnd();
-        //FINESTRA DI GIOCO
+
+        // Finestra di gioco
         int startX, endX;
 
         if ((int) viewport / 32 < 5)
@@ -513,10 +522,12 @@ public class ScenarioLevel extends Scenario {
         else
             startX = (int) viewport / 32 - 5;
         endX = Math.min((int) viewport / 32 + 25, levelWidth / 32);
-        //ENTITA'
+
+        // Entità ferme
         for (i = startX; i < endX; i++)
             drawEntities(model.getCurrentLevel().getEntities()[i], viewport);
-        //ENTITA' MOBILI
+
+        // Entità mobili
         for (MovingEntity entity : model.getCurrentLevel().getMovingEntities()) {
             int textureNumber;
             double limitYTexture, limitY;
@@ -564,7 +575,8 @@ public class ScenarioLevel extends Scenario {
                 }
             }
         }
-        //GIOCATORE
+
+        // Giocatore
         Textures.bindTexture(textures.getTextureMovingEntities());
         if (!softPaused || showPlayer) {
             if (player.isAlive()) {
@@ -597,7 +609,8 @@ public class ScenarioLevel extends Scenario {
                 glEnd();
             }
         }
-        //SPARI - GIOCATORE
+
+        // Sparo del giocatore
         if (player.getShoot().isVisible()) {
             Textures.bindTexture(textures.getTextureMovingEntities());
             glBegin(GL_QUADS);
@@ -611,7 +624,100 @@ public class ScenarioLevel extends Scenario {
             glVertex2d(((player.getShoot().getX() - 8 - viewport) / 640), ((player.getShoot().getY() - OFFSET_Y * 32 + 3 + 32) / 400));
             glEnd();
         }
-        //BACKGROUND
+
+        // Scritte dei livelli di transizione nuovo livello
+        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_LEVEL) {
+            Textures.bindTexture(textures.getTextureLevelsLeft());
+            if (model.getRemainingLevels() == 0) { // Finito il gioco
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (20d / 40));
+                glVertex2d((112d / 640), (114d / 400));
+                glTexCoord2d((432d / 480), (20d / 40));
+                glVertex2d((544d / 640), (114d / 400));
+                glTexCoord2d((432d / 480), (30d / 40));
+                glVertex2d((544d / 640), (124d / 400));
+                glTexCoord2d(0, (30d / 40));
+                glVertex2d((112d / 640), (124d / 400));
+                glEnd();
+            } else if (model.getRemainingLevels() == 1) { // Verso ultimo livello
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (10d / 40));
+                glVertex2d((128d / 640), (114d / 400));
+                glTexCoord2d((400d / 480), (10d / 40));
+                glVertex2d((528d / 640), (114d / 400));
+                glTexCoord2d((400d / 480), (20d / 40));
+                glVertex2d((528d / 640), (124d / 400));
+                glTexCoord2d(0, (20d / 40));
+                glVertex2d((128d / 640), (124d / 400));
+                glEnd();
+            } else { // Livello normale
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, 0);
+                glVertex2d((80d / 640), (114d / 400));
+                glTexCoord2d(1, 0);
+                glVertex2d((560d / 640), (114d / 400));
+                glTexCoord2d(1, (10d / 40));
+                glVertex2d((560d / 640), (124d / 400));
+                glTexCoord2d(0, (10d / 40));
+                glVertex2d((80d / 640), (124d / 400));
+                glEnd();
+
+                // Numero del livello (unità)
+                int levelUnit = model.getRemainingLevels() % 10 - 1;
+                glBegin(GL_QUADS);
+                glTexCoord2d((16d * levelUnit / 480), (30d / 40));
+                glVertex2d((352d / 640), (114d / 400));
+                glTexCoord2d((16d * (levelUnit + 1) / 480), (30d / 40));
+                glVertex2d((368d / 640), (114d / 400));
+                glTexCoord2d((16d * (levelUnit + 1) / 480), 1);
+                glVertex2d((368d / 640), (124d / 400));
+                glTexCoord2d((16d * levelUnit / 480), 1);
+                glVertex2d((352d / 640), (124d / 400));
+                glEnd();
+
+                // Decina (numero a due cifre)
+                if (model.getRemainingLevels() > 9) {
+                    int levelDigit = model.getRemainingLevels() / 10 - 1;
+                    glBegin(GL_QUADS);
+                    glTexCoord2d((16d * levelDigit / 480), (30d / 40));
+                    glVertex2d((336d / 640), (114d / 400));
+                    glTexCoord2d((16d * (levelDigit + 1) / 480), (30d / 40));
+                    glVertex2d((352d / 640), (114d / 400));
+                    glTexCoord2d((16d * (levelDigit + 1) / 480), 1);
+                    glVertex2d((352d / 640), (124d / 400));
+                    glTexCoord2d((16d * levelDigit / 480), 1);
+                    glVertex2d((336d / 640), (124d / 400));
+                    glEnd();
+                }
+            }
+        }
+
+        // Scritte dei livelli di transizione verso warpzone
+        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_WARPZONE) {
+            Textures.bindTexture(textures.getTextureGameParts());
+            glBegin(GL_QUADS);
+            glTexCoord2d(0, (262d / 290));
+            glVertex2d((70d / 640), (170d / 400));
+            glTexCoord2d((142d / 896), (262d / 290));
+            glVertex2d((212d / 640), (170d / 400));
+            glTexCoord2d((142d / 896), 1);
+            glVertex2d((212d / 640), (198d / 400));
+            glTexCoord2d(0, 1);
+            glVertex2d((70d / 640), (198d / 400));
+            glEnd();
+            glBegin(GL_QUADS);
+            glTexCoord2d((142d / 896), (262d / 290));
+            glVertex2d((394d / 640), (170d / 400));
+            glTexCoord2d((272d / 896), (262d / 290));
+            glVertex2d((524d / 640), (170d / 400));
+            glTexCoord2d((272d / 896), 1);
+            glVertex2d((524d / 640), (198d / 400));
+            glTexCoord2d((142d / 896), 1);
+            glVertex2d((394d / 640), (198d / 400));
+            glEnd();
+        }
+
+        // Sfondo
         Textures.bindTexture(textures.getTextureBackground());
         glBegin(GL_QUADS);
         glTexCoord2d(0, 0);

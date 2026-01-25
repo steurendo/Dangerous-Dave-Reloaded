@@ -15,6 +15,7 @@ public class Textures {
     private int textureEntities;
     private int textureMovingEntities;
     private int textureGameParts;
+    private int textureLevelsLeft;
 
     public Textures() {
         try {
@@ -22,6 +23,7 @@ public class Textures {
             textureEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "entities.png")));
             textureMovingEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "moving_entities.png")));
             textureGameParts = loadTexture(ImageIO.read(ResourceLoader.load(this, "game_parts.png")));
+            textureLevelsLeft = loadTexture(ImageIO.read(ResourceLoader.load(this, "levels_left.png")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,11 +45,15 @@ public class Textures {
         return textureGameParts;
     }
 
+    public int getTextureLevelsLeft() {
+        return textureLevelsLeft;
+    }
+
     public static void bindTexture(int texture) {
         glBindTexture(GL_TEXTURE_2D, texture);
     }
 
-    public static final int loadTexture(BufferedImage image) {
+    public static int loadTexture(BufferedImage image) {
         int x, y, pixel, textureID;
         int[] pixels;
         ByteBuffer buffer;

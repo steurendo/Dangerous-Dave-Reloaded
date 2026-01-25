@@ -11,11 +11,13 @@ public class Model {
     private Level currentLevel;
     private final Player player;
     private int state;
+    private final int levelsCount;
 
     public Model(Textures textures) {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
         levelsRoot = loader.loadLevelsStructure();
+        levelsCount = loader.getLevelsCount();
         currentLevel = levelsRoot;
         player = new Player();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
@@ -31,6 +33,10 @@ public class Model {
 
     public Level getCurrentLevel() {
         return currentLevel;
+    }
+
+    public int getRemainingLevels() {
+        return levelsCount - currentLevel.getNumber();
     }
 
     public void reset() {
