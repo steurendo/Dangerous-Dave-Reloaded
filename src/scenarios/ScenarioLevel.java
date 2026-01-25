@@ -40,16 +40,6 @@ public class ScenarioLevel extends Scenario {
     public void commands(double deltaT) {
         LevelType levelType = model.getCurrentLevel().getLevelType();
 
-        // Pausa (TEST!!!)
-        if (Keyboard.isKeyDown(GLFW_KEY_P)) {
-            if (pauseTrigger) {
-                paused = !paused;
-                pauseTrigger = false;
-            }
-        } else
-            pauseTrigger = true;
-        if (paused) return;
-
         // Se il livello è un livello di transizione, forza la camminata verso destra
         if (levelType == LevelType.TRANSITION_LEVEL || levelType == LevelType.TRANSITION_FROM_WARPZONE) {
             int directionX = Directions.RIGHT;
@@ -636,12 +626,70 @@ public class ScenarioLevel extends Scenario {
         }
 
         // Scritte dei livelli di transizione nuovo livello
-        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_LEVEL ||
-                model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_FROM_WARPZONE) {
-            // x -> 96
-            Textures.bindTexture(textures.getTextureGameParts());
-            glBegin(GL_QUADS);
-            glEnd();
+        if (model.getCurrentLevel().getLevelType() == LevelType.TRANSITION_LEVEL) {
+            Textures.bindTexture(textures.getTextureLevelsLeft());
+            if (model.getRemainingLevels() == 0) { // Finito il gioco
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (20d / 40));
+                glVertex2d((112d / 640), (114d / 400));
+                glTexCoord2d((432d / 480), (20d / 40));
+                glVertex2d((544d / 640), (114d / 400));
+                glTexCoord2d((432d / 480), (30d / 40));
+                glVertex2d((544d / 640), (124d / 400));
+                glTexCoord2d(0, (30d / 40));
+                glVertex2d((112d / 640), (124d / 400));
+                glEnd();
+            } else if (model.getRemainingLevels() == 1) { // Verso ultimo livello
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, (10d / 40));
+                glVertex2d((128d / 640), (114d / 400));
+                glTexCoord2d((400d / 480), (10d / 40));
+                glVertex2d((528d / 640), (114d / 400));
+                glTexCoord2d((400d / 480), (20d / 40));
+                glVertex2d((528d / 640), (124d / 400));
+                glTexCoord2d(0, (20d / 40));
+                glVertex2d((128d / 640), (124d / 400));
+                glEnd();
+            } else { // Livello normale
+                glBegin(GL_QUADS);
+                glTexCoord2d(0, 0);
+                glVertex2d((80d / 640), (114d / 400));
+                glTexCoord2d(1, 0);
+                glVertex2d((560d / 640), (114d / 400));
+                glTexCoord2d(1, (10d / 40));
+                glVertex2d((560d / 640), (124d / 400));
+                glTexCoord2d(0, (10d / 40));
+                glVertex2d((80d / 640), (124d / 400));
+                glEnd();
+
+                // Numero del livello (unità)
+                int levelUnit = model.getRemainingLevels() % 10 - 1;
+                glBegin(GL_QUADS);
+                glTexCoord2d((16d * levelUnit / 480), (30d / 40));
+                glVertex2d((352d / 640), (114d / 400));
+                glTexCoord2d((16d * (levelUnit + 1) / 480), (30d / 40));
+                glVertex2d((368d / 640), (114d / 400));
+                glTexCoord2d((16d * (levelUnit + 1) / 480), 1);
+                glVertex2d((368d / 640), (124d / 400));
+                glTexCoord2d((16d * levelUnit / 480), 1);
+                glVertex2d((352d / 640), (124d / 400));
+                glEnd();
+
+                // Decina (numero a due cifre)
+                if (model.getRemainingLevels() > 9) {
+                    int levelDigit = model.getRemainingLevels() / 10 - 1;
+                    glBegin(GL_QUADS);
+                    glTexCoord2d((16d * levelDigit / 480), (30d / 40));
+                    glVertex2d((336d / 640), (114d / 400));
+                    glTexCoord2d((16d * (levelDigit + 1) / 480), (30d / 40));
+                    glVertex2d((352d / 640), (114d / 400));
+                    glTexCoord2d((16d * (levelDigit + 1) / 480), 1);
+                    glVertex2d((352d / 640), (124d / 400));
+                    glTexCoord2d((16d * levelDigit / 480), 1);
+                    glVertex2d((336d / 640), (124d / 400));
+                    glEnd();
+                }
+            }
         }
 
         // Scritte dei livelli di transizione verso warpzone

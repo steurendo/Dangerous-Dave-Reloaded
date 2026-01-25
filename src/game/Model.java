@@ -16,7 +16,7 @@ public class Model {
     public Model(Textures textures) {
         state = 0;
         LevelsLoader loader = new LevelsLoader(textures);
-        levelsRoot = loader.loadLevelsStructure().getNext();
+        levelsRoot = loader.loadLevelsStructure();
         levelsCount = loader.getLevelsCount();
         currentLevel = levelsRoot;
         player = new Player();
@@ -35,8 +35,8 @@ public class Model {
         return currentLevel;
     }
 
-    public int getLevelsCount() {
-        return levelsCount;
+    public int getRemainingLevels() {
+        return levelsCount - currentLevel.getNumber();
     }
 
     public void reset() {
