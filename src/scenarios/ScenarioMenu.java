@@ -20,6 +20,7 @@ public class ScenarioMenu extends Scenario {
 
     @Override
     public void commands(double deltaT) {
+        if (!model.canStart()) return;
         if (Keyboard.isKeyDown(GLFW_KEY_SPACE))
             model.start();
     }
