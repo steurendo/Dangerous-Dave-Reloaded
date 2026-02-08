@@ -3,19 +3,29 @@ package ui;
 import game.Model;
 import game.ModelScore;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import scenarios.*;
+import scenarios.Scenario;
+import scenarios.ScenarioLevel;
+import scenarios.ScenarioMenu;
 import utils.ErrorDialog;
+import utils.ResourceLoader;
 import utils.Textures;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.memAlloc;
+import static org.lwjgl.system.MemoryUtil.memFree;
 
 public class Game {
     public static final String WINDOW_TITLE = "Dangerous Dave - Reloaded";
@@ -42,6 +52,8 @@ public class Game {
                 ErrorDialog.show("Errore: unable to create window (code: -2).");
                 System.exit(-2);
             }
+            //ICONA
+            setWindowIcon(this, window);
             //CONTROLLO PRESSIONE TASTI
             glfwSetKeyCallback(window, input = new Keyboard());
             //AZIONI IN SEGUITO AD UN RESIZE
@@ -94,7 +106,7 @@ public class Game {
     public void start() {
         double t0, t1 = glfwGetTime(), deltaT, deltaTAvg = 0;
         while (active) {
-            while (glfwGetTime() < t1 + 1f / 60);
+            while (glfwGetTime() < t1 + 1f / 60) ;
             t0 = t1;
             t1 = glfwGetTime();
             deltaT = t1 - t0;
@@ -121,5 +133,43 @@ public class Game {
         glfwTerminate();
         input.free();
         System.exit(0);
+    }
+
+    public static void setWindowIcon(Object context, long window) throws IOException {
+        BufferedImage image = ImageIO.read(ResourceLoader.load(context, "icon.png"));
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int[] pixels = new int[width * height];
+        image.getRGB(0, 0, width, height, pixels, 0, width);
+
+        ByteBuffer buffer = memAlloc(width * height * 4);
+
+        // GLFW vuole RGBA, top-left → bottom-left NON viene invertito
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = pixels[y * width + x];
+
+                buffer.put((byte) ((pixel >> 16) & 0xFF)); // R
+                buffer.put((byte) ((pixel >> 8) & 0xFF));  // G
+                buffer.put((byte) (pixel & 0xFF));         // B
+                buffer.put((byte) ((pixel >> 24) & 0xFF)); // A
+            }
+        }
+
+        buffer.flip();
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            GLFWImage icon = GLFWImage.malloc(stack);
+            icon.set(width, height, buffer);
+
+            GLFWImage.Buffer icons = GLFWImage.malloc(1, stack);
+            icons.put(0, icon);
+
+            glfwSetWindowIcon(window, icons);
+        }
+
+        memFree(buffer);
     }
 }
