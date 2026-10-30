@@ -10,6 +10,7 @@ import java.util.*;
 public class Level {
     public final static int TILES_ALONG_Y = 13;  // 1 SOTTO, DUE SOPRA IN PIù
     public final static int OFFSET_Y = 2;
+    private final static double EPSILON = 1e-6;
 
     private final boolean[][] map;
     private final boolean[][] climbables;
@@ -45,6 +46,26 @@ public class Level {
         warpzone = null;
         levelType = null;
         warpzoneCompleted = false;
+    }
+
+    public static int firstCell(double min) {
+        return (int) Math.floor(min / 32);
+    }
+
+    public static int lastCell(double max) {
+        return (int) Math.floor((max - EPSILON) / 32);
+    }
+
+    private boolean isSolidCell(int x, int y) {
+        if (x < 0 || x >= width) return true;
+        return map[x][Math.floorMod(y, TILES_ALONG_Y)];
+    }
+
+    public boolean isSolidInRect(double left, double top, double right, double bottom) {
+        for (int x = firstCell(left); x <= lastCell(right); x++)
+            for (int y = firstCell(top); y <= lastCell(bottom); y++)
+                if (isSolidCell(x, y)) return true;
+        return false;
     }
 
     public boolean checkPureCollision(double x, double y) {

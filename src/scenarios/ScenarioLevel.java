@@ -229,33 +229,36 @@ public class ScenarioLevel extends Scenario {
 
     private void collisionsWithWorld() {
         Level level = model.getCurrentLevel();
-        PointD speed = player.getSpeed();
-        PointD[] corners = player.getCorners();
+        double dx = player.getSpeedX();
+        // speed.y è una velocità: lo spostamento verticale del frame è speed.y * scale
+        double dy = player.getSpeedY() * Timing.scale();
+        double left = player.getLeft(), right = player.getRight();
+        double top = player.getTop(), bottom = player.getBottom();
 
-        for (PointD corner : corners) {
-            // speed.y è una velocità: lo spostamento verticale del frame è speed.y * scale
-            double dy = speed.y * Timing.scale();
-            // Collisione lungo y
-            if (level.checkPureCollision(corner.x, corner.y + dy)) {
-                if (player.isJumping()) {
-                    speed.y = Player.SPEED_FAST;
-                } else {
-                    if (player.isOnJetpack() || player.isClimbing())
-                        player.setY(Math.round((corner.y + dy) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
-                    else {
-                        player.setY(Math.round((corner.y + dy) / 32) * 32 - Player.HEIGHT / 2);
-                    }
-                    speed.y = 0;
-                    player.setFreeFalling(false);
-                }
-            }
-            // Collisione lungo x
-            if (level.checkPureCollision(corner.x + speed.x, corner.y)) {
-                speed.x = 0;
+        if (dx != 0 && level.isSolidInRect(left + dx, top, right + dx, bottom)) {
+            if (dx > 0)
+                dx = Math.max(0, Level.lastCell(right + dx) * 32 - right);
+            else
+                dx = Math.min(0, (Level.firstCell(left + dx) + 1) * 32 - left);
+            if (dx != 0 && level.isSolidInRect(left + dx, top, right + dx, bottom))
+                dx = 0;
+            player.setSpeedX(dx);
+            player.setFreeFalling(false);
+        }
+
+        if (dy != 0 && level.isSolidInRect(left + dx, top + dy, right + dx, bottom + dy)) {
+            if (dy > 0) {
+                // Atterraggio
+                player.setY(Level.lastCell(bottom + dy) * 32 - Player.HEIGHT / 2);
+                player.setSpeedY(0);
+                player.setIfIsJumping(false);
                 player.setFreeFalling(false);
+            } else {
+                // Testata
+                player.setY((Level.firstCell(top + dy) + 1) * 32 + Player.BOX_HEIGHT / 2);
+                player.setSpeedY(player.isOnJetpack() || player.isClimbing() ? 0 : Player.SPEED_FAST);
             }
         }
-        player.setSpeed(speed);
     }
 
     private void collisionsWithEntities() {

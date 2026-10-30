@@ -54,6 +54,22 @@ public class Player {
         return location;
     }
 
+    public double getLeft() {
+        return location.x - WIDTH / 2;
+    }
+
+    public double getRight() {
+        return location.x + WIDTH / 2;
+    }
+
+    public double getTop() {
+        return location.y - BOX_HEIGHT / 2;
+    }
+
+    public double getBottom() {
+        return location.y + HEIGHT / 2;
+    }
+
     public PointD[] getCorners() {
         return new PointD[]{
                 new PointD(location.x - WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-LEFT
