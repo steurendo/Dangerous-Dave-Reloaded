@@ -1,3 +1,5 @@
+# Dangerous Dave Reloaded #
+
 High school thesis project.
 
 This project was intended to be a close replica of the old game Dangerous Dave,
