@@ -1,6 +1,7 @@
 package entities;
 
 import utils.PointD;
+import utils.Timing;
 
 import static game.Level.TILES_ALONG_Y;
 
@@ -30,7 +31,7 @@ public class Player {
     private boolean onJetpack;
     private boolean jetpackUnlocked;
     private boolean jumping;
-    private int jumpCooldown;
+    private double jumpCooldown;
     private boolean falling;
     private boolean climbing;
     private final Shoot shoot;
@@ -163,7 +164,7 @@ public class Player {
         return deadCounter;
     }
 
-    public int getJumpCooldown() {
+    public double getJumpCooldown() {
         return jumpCooldown;
     }
 
@@ -219,7 +220,7 @@ public class Player {
     }
 
     public void moveY() {
-        location.y += speedY;
+        location.y += speedY * Timing.scale();
         if (location.y < 0) location.y += TILES_ALONG_Y * 32;
         if (location.y >= TILES_ALONG_Y * 32) location.y -= TILES_ALONG_Y * 32;
     }
@@ -331,21 +332,21 @@ public class Player {
         deadCounter = DEAD_COUNTER;
     }
 
-    public void update(double deltaT) {
+    public void update() {
         if (shoot.isVisible())
-            shoot.update(deltaT);
+            shoot.update();
         if (Math.abs(shoot.getX() - location.x) > 400)
             shoot.setDirection(0);
         if (!alive && deadCounter >= 0)
-            deadCounter -= deltaT * 60;
+            deadCounter -= Timing.scale();
         if (onJetpack) {
             if (alive)
-                jetpackValue -= 0.1 * deltaT * 60;
+                jetpackValue -= 0.1 * Timing.scale();
             if (jetpackValue <= 0)
                 triggerJetpackToggle();
         }
         if (jumpCooldown > 0)
-            jumpCooldown--;
+            jumpCooldown = Math.max(0, jumpCooldown - Timing.scale());
         if (jumping)
             setIfIsJumping(speedY < FREE_FALLING_SPEED && !onJetpack && !climbing);
         setIfIsFalling(speedY > FREE_FALLING_SPEED && !onJetpack && !climbing);
@@ -376,11 +377,11 @@ public class Player {
         alive = false;
     }
 
-    public void updateFigureNumber(double deltaT) {
+    public void updateFigureNumber() {
         boolean isWalking = speedX != 0;
         boolean isClimbing = climbing && (speedX != 0 || speedY != 0);
         if (onJetpack || isWalking || isClimbing) {
-            figureNumber += deltaT * 60;
+            figureNumber += Timing.scale();
             if (figureNumber >= maxFigureNumber * Player.FIGURE_SPEED)
                 figureNumber -= maxFigureNumber * Player.FIGURE_SPEED;
         }

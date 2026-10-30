@@ -7,6 +7,7 @@ import ui.Keyboard;
 import ui.SpamLockTime;
 import utils.PointD;
 import utils.Textures;
+import utils.Timing;
 
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.glfw.GLFW.*;
@@ -39,7 +40,7 @@ public class ScenarioLevel extends Scenario {
 
 
     @Override
-    public void commands(double deltaT) {
+    public void commands() {
         LevelType levelType = model.getCurrentLevel().getLevelType();
 
         if (model.isWaitingForCommand()) {
@@ -77,7 +78,7 @@ public class ScenarioLevel extends Scenario {
         if (levelType == LevelType.TRANSITION_LEVEL || levelType == LevelType.TRANSITION_FROM_WARPZONE) {
             int directionX = Directions.RIGHT;
             player.setDirectionX(directionX);
-            player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
+            player.setSpeedX(Player.SPEED_SLOW * directionX * Timing.scale());
         } else if (levelType != LevelType.TRANSITION_WARPZONE) {
             // Pausa (P)
             if (Keyboard.isKeyDown(GLFW_KEY_P)) {
@@ -131,9 +132,9 @@ public class ScenarioLevel extends Scenario {
                 else
                     player.setDirectionY(directionY);
                 if (player.isOnJetpack() || player.isClimbing()) {
-                    player.setSpeedY(Player.SPEED_FAST * directionY * deltaT * 60);
+                    player.setSpeedY(Player.SPEED_FAST * directionY);
                 } else if (directionY == Directions.UP) {
-                    if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() == 0) {
+                    if (!player.isJumping() && !player.isFalling() && player.getJumpCooldown() <= 0) {
                         player.setSpeedY(Player.JUMP_POWER);
                         player.setIfIsJumping(true);
                     }
@@ -153,15 +154,15 @@ public class ScenarioLevel extends Scenario {
                     player.setDirectionX(directionX);
 
                 if (player.isClimbing() || player.isOnJetpack() || player.isJumping() || player.isFalling())
-                    player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
+                    player.setSpeedX(Player.SPEED_FAST * directionX * Timing.scale());
                 else
-                    player.setSpeedX(Player.SPEED_SLOW * directionX * deltaT * 60);
+                    player.setSpeedX(Player.SPEED_SLOW * directionX * Timing.scale());
                 player.setFreeFalling(player.isFalling());
             }
 
             if (player.isFreeFalling()) {
                 int directionX = player.getDirectionX();
-                player.setSpeedX(Player.SPEED_FAST * directionX * deltaT * 60);
+                player.setSpeedX(Player.SPEED_FAST * directionX * Timing.scale());
             }
 
             if (softPaused) {
@@ -181,12 +182,12 @@ public class ScenarioLevel extends Scenario {
             if (player.getSpeedY() == 0)
                 player.setSpeedY(Player.SPEED_FAST);
             else
-                player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY * deltaT * 60, Player.SPEED_FAST));
+                player.setSpeedY(Math.min(player.getSpeedY() + Player.GRAVITY * Timing.scale(), Player.SPEED_FAST));
         }
     }
 
     @Override
-    public void collisions(double deltaT) {
+    public void collisions() {
         if (!player.isAlive() || paused || softPaused) return;
 
         LevelType levelType = model.getCurrentLevel().getLevelType();
@@ -218,7 +219,7 @@ public class ScenarioLevel extends Scenario {
         PointD[] corners = player.getCorners();
 
         for (PointD corner : corners) {
-            if (level.isTouchingWorldBorders(corner.x + speed.x, corner.y + speed.y)) {
+            if (level.isTouchingWorldBorders(corner.x + speed.x, corner.y + speed.y * Timing.scale())) {
                 model.nextLevel(this::setSoftPaused);
                 return;
             }
@@ -231,15 +232,17 @@ public class ScenarioLevel extends Scenario {
         PointD[] corners = player.getCorners();
 
         for (PointD corner : corners) {
+            // speed.y è una velocità: lo spostamento verticale del frame è speed.y * scale
+            double dy = speed.y * Timing.scale();
             // Collisione lungo y
-            if (level.checkPureCollision(corner.x, corner.y + speed.y)) {
+            if (level.checkPureCollision(corner.x, corner.y + dy)) {
                 if (player.isJumping()) {
                     speed.y = Player.SPEED_FAST;
                 } else {
                     if (player.isOnJetpack() || player.isClimbing())
-                        player.setY(Math.round((corner.y + speed.y) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
+                        player.setY(Math.round((corner.y + dy) / 32) * 32 - player.getDirectionY() * Player.HEIGHT / 2);
                     else {
-                        player.setY(Math.round((corner.y + speed.y) / 32) * 32 - Player.HEIGHT / 2);
+                        player.setY(Math.round((corner.y + dy) / 32) * 32 - Player.HEIGHT / 2);
                     }
                     speed.y = 0;
                     player.setFreeFalling(false);
@@ -296,28 +299,28 @@ public class ScenarioLevel extends Scenario {
     }
 
     @Override
-    public void update(double deltaT) {
+    public void update() {
         if (paused) return;
-        player.updateFigureNumber(deltaT);
-        figureNumber += deltaT * 60;
+        player.updateFigureNumber();
+        figureNumber += Timing.scale();
         if (figureNumber >= MAX_FIGURE_NUMBER) figureNumber -= MAX_FIGURE_NUMBER;
 
         if (!player.isAlive() && player.getDeadCounter() <= 0) manageDeath();
 
         if (softPaused) {
-            softPauseFigureNumber += deltaT * 60;
+            softPauseFigureNumber += Timing.scale();
             if (softPauseFigureNumber >= 16) {
                 softPauseFigureNumber -= 16;
                 showPlayer = !showPlayer;
             }
             return;
         }
-        movingEntitiesFigureNumber += deltaT * 60;
+        movingEntitiesFigureNumber += Timing.scale();
         if (movingEntitiesFigureNumber >= MAX_FIGURE_NUMBER) movingEntitiesFigureNumber -= MAX_FIGURE_NUMBER;
 
-        player.update(deltaT);
+        player.update();
         for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
-            entity.update(deltaT, player.getLocation());
+            entity.update(player.getLocation());
 
         //SPARO
         if (player.getShoot().isVisible())
@@ -361,7 +364,7 @@ public class ScenarioLevel extends Scenario {
     }
 
     @Override
-    public void render(double deltaT) {
+    public void render() {
         double viewport;
         PointD playerLocation;
         int levelWidth;

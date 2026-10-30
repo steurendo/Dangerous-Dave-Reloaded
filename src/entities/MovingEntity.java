@@ -1,7 +1,7 @@
 package entities;
 
-import utils.Functions;
 import utils.PointD;
+import utils.Timing;
 
 import java.awt.*;
 
@@ -76,18 +76,18 @@ public class MovingEntity extends Entity {
                 Math.abs(location.y - shootLocation.y) < height / 2 + 3);
     }
 
-    public void update(double deltaT, PointD playerLocation) {
+    public void update(PointD playerLocation) {
         if (!alive && deadCounter >= 0)
-            deadCounter -= deltaT * 60;
+            deadCounter -= Timing.scale();
         if (deadCounter <= 0)
             visible = false;
         if (shoot.isVisible())
-            shoot.update(deltaT);
+            shoot.update();
         if (alive) {
             if (Math.abs(shoot.getX() - location.x) > 400)
                 shoot.setDirection(0);
             if (shootReload > 0)
-                shootReload -= deltaT * 60;
+                shootReload -= Timing.scale();
             if (shootReload <= 0) {
                 int direction = location.x > playerLocation.x ? Directions.LEFT : Directions.RIGHT;
                 shoot.setLocation(new PointD(location.x + (width / 2 * direction), location.y));
@@ -122,8 +122,8 @@ public class MovingEntity extends Entity {
                 delta.y += Math.sin(movingNumber * 60) * 2;
             } else if (code == 7)
                 delta.x += Math.cos(movingNumber * 4) * 4;
-            location = location.plus(delta.scale(deltaT * 60));
-            movingNumber = (movingNumber + 0.01 * deltaT * 60) % 360;
+            location = location.plus(delta.scale(Timing.scale()));
+            movingNumber = (movingNumber + 0.01 * Timing.scale()) % 360;
         }
     }
 }

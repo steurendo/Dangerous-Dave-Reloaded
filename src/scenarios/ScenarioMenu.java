@@ -3,6 +3,7 @@ package scenarios;
 import game.Model;
 import ui.Keyboard;
 import utils.Textures;
+import utils.Timing;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.opengl.GL11.*;
@@ -19,19 +20,19 @@ public class ScenarioMenu extends Scenario {
     }
 
     @Override
-    public void commands(double deltaT) {
+    public void commands() {
         if (!model.canStart()) return;
         if (Keyboard.isKeyDown(GLFW_KEY_SPACE))
             model.start();
     }
 
     @Override
-    public void collisions(double deltaT) {
+    public void collisions() {
     }
 
     @Override
-    public void update(double deltaT) {
-        figureNumber += deltaT * 60;
+    public void update() {
+        figureNumber += Timing.scale();
         if (figureNumber >= 16) {
             figureNumber -= 16;
             drawText = !drawText;
@@ -39,7 +40,7 @@ public class ScenarioMenu extends Scenario {
     }
 
     @Override
-    public void render(double deltaT) {
+    public void render() {
         int figureNumber = (int) this.figureNumber;
         //LOGO
         Textures.bindTexture(textures.getTextureGameParts());
