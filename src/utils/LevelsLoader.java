@@ -1,14 +1,11 @@
 package utils;
 
 import entities.Entity;
-import entities.EntityChain;
 import entities.MovingEntity;
 import game.Level;
 import game.LevelType;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,19 +99,8 @@ public class LevelsLoader {
     public Level loadLevelsStructure() {
         Level firstLevel = null;
         try {
-            int x, y;
-            BufferedImage tilemapPicture;
-            BufferedImage[][] tilemap;
-
-            tilemapPicture = ImageIO.read(ResourceLoader.load(this, "tilemap.png"));
-            // Definisco i tiles disponibili
-            tilemap = new BufferedImage[8][7];
-            for (x = 0; x < 8; x++)
-                for (y = 0; y < 7; y++)
-                    tilemap[x][y] = tilemapPicture.getSubimage(x * 32, y * 32, 32, 32);
-
             System.out.println("Initializing levels structure");
-            LogicalStructure logicalStructure = loadLevels(tilemap);
+            LogicalStructure logicalStructure = loadLevels();
             firstLevel = buildLevelStructure(logicalStructure);
         } catch (Exception e) {
             System.out.println("loadLevelsStructure: " + e.getMessage());
@@ -127,7 +113,7 @@ public class LevelsLoader {
         return levelsCount;
     }
 
-    private LogicalStructure loadLevels(BufferedImage[][] tilemap) throws Exception {
+    private LogicalStructure loadLevels() throws Exception {
         char[] line;
         int readCount;
         LogicalStructure logicalStructure = new LogicalStructure();
@@ -155,7 +141,7 @@ public class LevelsLoader {
 
             // Leggo il livello
             levelId = decrypt(line);
-            logicalLevel = readLevel(tilemap);
+            logicalLevel = readLevel();
             logicalStructure.structure.put(levelId, logicalLevel);
         } while (readCount > 0);
 
@@ -222,11 +208,24 @@ public class LevelsLoader {
         return level;
     }
 
-    private void addEntity(EntityChain entities, Entity entity) {
-        if (entities.getNext() != null)
-            addEntity(entities.getNext(), entity);
-        else
-            entities.setNext(entity);
+    // Hitbox ridotta per entità fisse
+    private static void applyHazardHitbox(Entity entity) {
+        switch (entity.getCode()) {
+            case 22: // fuoco
+                entity.setHitboxInsets(5, 8);
+                break;
+            case 23: // acqua
+            case 24: // lava
+                entity.setHitboxInsets(2, 4);
+                break;
+            case 25: // tentacoli
+            case 26:
+                entity.setHitboxInsets(4, 0);
+                break;
+            case 27: // lame
+                entity.setHitboxInsets(3, 0);
+                break;
+        }
     }
 
 
@@ -255,7 +254,7 @@ public class LevelsLoader {
         return ((toDec(src) / LevelsLoader.PW) - LevelsLoader.LV);
     }
 
-    private LogicalLevel readLevel(BufferedImage[][] tilemap) throws Exception {
+    private LogicalLevel readLevel() throws Exception {
         char[] line;
         boolean[][] map;
         boolean[][] climbables;
@@ -263,11 +262,8 @@ public class LevelsLoader {
         LogicalLevel logicalLevel;
         int tileCode, levelWidth;
         Point spawnpoint;
-        EntityChain[] entities;
         ArrayList<MovingEntity> movingEntities;
         Entity[][] entitiesMap;
-        BufferedImage background;
-        Graphics gD;
 
         line = new char[8];
         logicalLevel = new LogicalLevel();
@@ -296,7 +292,6 @@ public class LevelsLoader {
         map = new boolean[levelWidth][TILES_ALONG_Y];
         climbables = new boolean[levelWidth][TILES_ALONG_Y];
         mapCodes = new int[levelWidth][TILES_ALONG_Y];
-        entities = new EntityChain[levelWidth];
         movingEntities = new ArrayList<>();
         entitiesMap = new Entity[levelWidth][TILES_ALONG_Y];
         for (int x = 0; x < levelWidth; x++) {
@@ -321,11 +316,9 @@ public class LevelsLoader {
                                 heights[tileCode],
                                 scoreValues[tileCode],
                                 mortals[tileCode]);
+                        if (mortals[tileCode])
+                            applyHazardHitbox(entity);
                         entitiesMap[x][y] = entity;
-                        if (entities[x] == null)
-                            entities[x] = new EntityChain(entity);
-                        else
-                            addEntity(entities[x], entity);
                     } else {
                         entity = new MovingEntity(textures.getTextureMovingEntities(), tileCodes[tileCode], figuresNumber[tileCode], new PointD(x * 32 + 16, y * 32 + 16), widths[tileCode], heights[tileCode], scoreValues[tileCode], mortals[tileCode]);
                         movingEntities.add((MovingEntity) entity);
@@ -334,32 +327,14 @@ public class LevelsLoader {
             }
         }
 
-        // Disegno del livello
-        background = new BufferedImage(levelWidth * 32, 320, BufferedImage.TYPE_INT_ARGB);
-        gD = background.getGraphics();
-
-        for (int x = 0; x < levelWidth; x++) {
-            for (int y = OFFSET_Y; y < TILES_ALONG_Y - (3 - OFFSET_Y); y++) {
-                tileCode = mapCodes[x][y];
-                Point tile = new Point();
-                tile.y = tileCode / 8;
-                tile.x = tileCode - 8 * tile.y;
-                if (tileCode >= 1 && tileCode <= 18) {
-                    gD.drawImage(tilemap[tile.x][tile.y], x * 32, (y - OFFSET_Y) * 32, null);
-                }
-            }
-        }
-        gD.dispose();
-
         logicalLevel.level = new Level(
                 map,
                 climbables,
                 levelWidth,
                 spawnpoint,
-                entities,
                 movingEntities,
                 entitiesMap,
-                Textures.loadTexture(background)
+                mapCodes
         );
 
         return logicalLevel;

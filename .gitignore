@@ -32,3 +32,4 @@ bin/
 .idea/workspace.xml
 /scores.dat
 /*.log
+/.idea/

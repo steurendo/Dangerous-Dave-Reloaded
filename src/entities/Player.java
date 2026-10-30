@@ -1,6 +1,7 @@
 package entities;
 
 import utils.PointD;
+import utils.Timing;
 
 import static game.Level.TILES_ALONG_Y;
 
@@ -30,7 +31,7 @@ public class Player {
     private boolean onJetpack;
     private boolean jetpackUnlocked;
     private boolean jumping;
-    private int jumpCooldown;
+    private double jumpCooldown;
     private boolean falling;
     private boolean climbing;
     private final Shoot shoot;
@@ -53,13 +54,20 @@ public class Player {
         return location;
     }
 
-    public PointD[] getCorners() {
-        return new PointD[]{
-                new PointD(location.x - WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-LEFT
-                new PointD(location.x + WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-RIGHT
-                new PointD(location.x - WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-LEFT
-                new PointD(location.x + WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-RIGHT
-        };
+    public double getLeft() {
+        return location.x - WIDTH / 2;
+    }
+
+    public double getRight() {
+        return location.x + WIDTH / 2;
+    }
+
+    public double getTop() {
+        return location.y - BOX_HEIGHT / 2;
+    }
+
+    public double getBottom() {
+        return location.y + HEIGHT / 2;
     }
 
     public double getX() {
@@ -76,15 +84,6 @@ public class Player {
 
     public int getScore() {
         return score;
-    }
-
-    public void setSpeed(PointD speed) {
-        speedX = speed.x;
-        speedY = speed.y;
-    }
-
-    public PointD getSpeed() {
-        return new PointD(speedX, speedY);
     }
 
     public double getSpeedX() {
@@ -163,7 +162,7 @@ public class Player {
         return deadCounter;
     }
 
-    public int getJumpCooldown() {
+    public double getJumpCooldown() {
         return jumpCooldown;
     }
 
@@ -219,7 +218,7 @@ public class Player {
     }
 
     public void moveY() {
-        location.y += speedY;
+        location.y += speedY * Timing.scale();
         if (location.y < 0) location.y += TILES_ALONG_Y * 32;
         if (location.y >= TILES_ALONG_Y * 32) location.y -= TILES_ALONG_Y * 32;
     }
@@ -331,21 +330,21 @@ public class Player {
         deadCounter = DEAD_COUNTER;
     }
 
-    public void update(double deltaT) {
+    public void update() {
         if (shoot.isVisible())
-            shoot.update(deltaT);
+            shoot.update();
         if (Math.abs(shoot.getX() - location.x) > 400)
             shoot.setDirection(0);
         if (!alive && deadCounter >= 0)
-            deadCounter -= deltaT * 60;
+            deadCounter -= Timing.scale();
         if (onJetpack) {
             if (alive)
-                jetpackValue -= 0.1 * deltaT * 60;
+                jetpackValue -= 0.1 * Timing.scale();
             if (jetpackValue <= 0)
                 triggerJetpackToggle();
         }
         if (jumpCooldown > 0)
-            jumpCooldown--;
+            jumpCooldown = Math.max(0, jumpCooldown - Timing.scale());
         if (jumping)
             setIfIsJumping(speedY < FREE_FALLING_SPEED && !onJetpack && !climbing);
         setIfIsFalling(speedY > FREE_FALLING_SPEED && !onJetpack && !climbing);
@@ -376,11 +375,11 @@ public class Player {
         alive = false;
     }
 
-    public void updateFigureNumber(double deltaT) {
+    public void updateFigureNumber() {
         boolean isWalking = speedX != 0;
         boolean isClimbing = climbing && (speedX != 0 || speedY != 0);
         if (onJetpack || isWalking || isClimbing) {
-            figureNumber += deltaT * 60;
+            figureNumber += Timing.scale();
             if (figureNumber >= maxFigureNumber * Player.FIGURE_SPEED)
                 figureNumber -= maxFigureNumber * Player.FIGURE_SPEED;
         }
@@ -396,8 +395,8 @@ public class Player {
         if (!alive)
             return false;
 
-        if (Math.abs(location.x - entity.getX()) < WIDTH / 2 + entity.getWidth() / 2 &&
-                Math.abs(location.y - entity.getY()) < HEIGHT / 2 + entity.getHeight() / 2) //COLLIDE CON UN'ENTITA'
+        if (location.x - WIDTH / 2 < entity.getHitboxRight() && location.x + WIDTH / 2 > entity.getHitboxLeft() &&
+                location.y - HEIGHT / 2 < entity.getHitboxBottom() && location.y + HEIGHT / 2 > entity.getHitboxTop()) //COLLIDE CON UN'ENTITA'
         {
             if (entity.isMortal()) {
                 score += entity.getScoreValue(); //IL PLAYER MUORE
@@ -433,6 +432,7 @@ public class Player {
 
         shootLocation = shoot.getLocation();
         return (Math.abs(location.x - shootLocation.x) < WIDTH / 2 + 20 &&
-                Math.abs(location.y - shootLocation.y) < WIDTH / 2 + 3);
+                shootLocation.y > location.y - BOX_HEIGHT / 2 - 3 &&
+                shootLocation.y < location.y + HEIGHT / 2 + 3);
     }
 }

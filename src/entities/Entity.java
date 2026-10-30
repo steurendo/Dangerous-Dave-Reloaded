@@ -15,6 +15,8 @@ public class Entity {
     protected int scoreValue;
     protected boolean mortal;
     protected boolean visible;
+    protected double hitboxInsetX;
+    protected double hitboxInsetTop;
 
     public Entity(int texture, int code, int figuresNumber, PointD location, double width, double height, int scoreValue, boolean mortal) {
         this.texture = texture;
@@ -85,5 +87,26 @@ public class Entity {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public void setHitboxInsets(double insetX, double insetTop) {
+        hitboxInsetX = insetX;
+        hitboxInsetTop = insetTop;
+    }
+
+    public double getHitboxLeft() {
+        return location.x - width / 2 + hitboxInsetX;
+    }
+
+    public double getHitboxRight() {
+        return location.x + width / 2 - hitboxInsetX;
+    }
+
+    public double getHitboxTop() {
+        return location.y - height / 2 + hitboxInsetTop;
+    }
+
+    public double getHitboxBottom() {
+        return location.y + height / 2;
     }
 }

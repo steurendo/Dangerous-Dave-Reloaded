@@ -1,6 +1,7 @@
 package entities;
 
 import utils.PointD;
+import utils.Timing;
 
 import static entities.Directions.STILL;
 
@@ -43,8 +44,8 @@ public class Shoot {
         this.direction = direction;
     }
 
-    public void update(double deltaT) {
-        location.x += direction * SPEED * deltaT * 60;
+    public void update() {
+        location.x += direction * SPEED * Timing.scale();
     }
 
     public void reset() {
