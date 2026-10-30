@@ -18,11 +18,14 @@ public class Textures {
     private int textureLevelsLeft;
     private int textureScoreParts;
     private int textureTilemap;
+    private int texturePickupEffects;
 
     public Textures() {
         try {
             textureBackground = loadTexture(ImageIO.read(ResourceLoader.load(this, "background.png")));
-            textureEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "entities.png")));
+            BufferedImage entities = ImageIO.read(ResourceLoader.load(this, "entities.png"));
+            textureEntities = loadTexture(entities);
+            texturePickupEffects = loadTexture(withoutBlack(entities));
             textureMovingEntities = loadTexture(ImageIO.read(ResourceLoader.load(this, "moving_entities.png")));
             textureGameParts = loadTexture(ImageIO.read(ResourceLoader.load(this, "game_parts.png")));
             textureLevelsLeft = loadTexture(ImageIO.read(ResourceLoader.load(this, "levels_left.png")));
@@ -35,6 +38,20 @@ public class Textures {
 
     public int getTextureBackground() {
         return textureBackground;
+    }
+
+    public int getTexturePickupEffects() {
+        return texturePickupEffects;
+    }
+
+    private static BufferedImage withoutBlack(BufferedImage image) {
+        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < image.getHeight(); y++)
+            for (int x = 0; x < image.getWidth(); x++) {
+                int argb = image.getRGB(x, y);
+                copy.setRGB(x, y, (argb & 0xFFFFFF) == 0 ? 0 : argb);
+            }
+        return copy;
     }
 
     public int getTextureEntities() {

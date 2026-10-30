@@ -10,6 +10,9 @@ import utils.Screen;
 import utils.Textures;
 import utils.Timing;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import static game.Level.OFFSET_Y;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -20,6 +23,8 @@ public class ScenarioLevel extends Scenario {
 
     private final ModelScore modelScore;
     private final Player player;
+    private final ArrayList<PickupEffect> pickupEffects;
+    private Level pickupEffectsLevel;
     private double figureNumber;
     private double movingEntitiesFigureNumber;
     private double softPauseFigureNumber;
@@ -33,6 +38,7 @@ public class ScenarioLevel extends Scenario {
         this.modelScore = modelScore;
         this.textures = textures;
         player = model.getPlayer();
+        pickupEffects = new ArrayList<>();
         figureNumber = 0;
         movingEntitiesFigureNumber = 0;
         paused = false;
@@ -263,8 +269,13 @@ public class ScenarioLevel extends Scenario {
         int y1 = (int) Math.floor((player.getY() + Player.HEIGHT / 2) / 32);
 
         for (int x = x0; x <= x1; x++)
-            for (int y = y0; y <= y1; y++)
-                player.checkCollisionWithEntity(level.getEntity(x, y));
+            for (int y = y0; y <= y1; y++) {
+                Entity entity = level.getEntity(x, y);
+                boolean wasVisible = entity != null && entity.isVisible();
+                player.checkCollisionWithEntity(entity);
+                if (wasVisible && !entity.isVisible())
+                    startPickupEffect(entity);
+            }
     }
 
     private void collisionsWithMovingEntities() {
@@ -313,6 +324,7 @@ public class ScenarioLevel extends Scenario {
         }
         movingEntitiesFigureNumber += Timing.scale();
         if (movingEntitiesFigureNumber >= MAX_FIGURE_NUMBER) movingEntitiesFigureNumber -= MAX_FIGURE_NUMBER;
+        updatePickupEffects();
 
         player.update();
         for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
@@ -422,6 +434,15 @@ public class ScenarioLevel extends Scenario {
             for (int j = 0; j < Level.TILES_ALONG_Y; j++)
                 drawEntity(level.getEntity(i, j), viewport);
         glEnd();
+
+        // Oggetti appena raccolti
+        if (pickupEffectsLevel == level && !pickupEffects.isEmpty()) {
+            Textures.bindTexture(textures.getTexturePickupEffects());
+            glBegin(GL_QUADS);
+            for (PickupEffect effect : pickupEffects)
+                drawPickupEffect(effect, viewport);
+            glEnd();
+        }
 
         // Schermata di fine gioco
         if (level.getLevelType() == LevelType.ENDGAME) {
@@ -797,6 +818,61 @@ public class ScenarioLevel extends Scenario {
                 glEnd();
             }
         }
+    }
+
+    private void startPickupEffect(Entity entity) {
+        Level level = model.getCurrentLevel();
+        if (pickupEffectsLevel != level) {
+            pickupEffects.clear();
+            pickupEffectsLevel = level;
+        }
+        pickupEffects.add(new PickupEffect(entity));
+    }
+
+    private void updatePickupEffects() {
+        if (pickupEffectsLevel != model.getCurrentLevel()) {
+            pickupEffects.clear();
+            return;
+        }
+        Iterator<PickupEffect> iterator = pickupEffects.iterator();
+        while (iterator.hasNext()) {
+            PickupEffect effect = iterator.next();
+            effect.update(Timing.scale() / 60);
+            if (effect.isFinished()) iterator.remove();
+        }
+    }
+
+    private void drawPickupEffect(PickupEffect effect, double viewport) {
+        Entity entity = effect.getEntity();
+        double scale = effect.getScale();
+        if (scale <= 0) return;
+        int textureNumber = ((int) figureNumber / FIGURE_SPEED + (int) entity.getX() / 32 + (int) entity.getY() / 32) % entity.getFiguresNumber();
+        double centerX = entity.getX() - viewport;
+        double centerY = entity.getY() - OFFSET_Y * 32 + 32;
+        double halfWidth = entity.getWidth() * scale / 2, halfHeight = entity.getHeight() * scale / 2;
+        double top = centerY - halfHeight, bottom = centerY + halfHeight;
+        double textureTop = entity.getTextureY(), textureBottom = entity.getTextureY() + entity.getHeight();
+        if (top < 32) {
+            textureTop += (32 - top) / scale;
+            top = 32;
+        }
+        if (bottom > 332) {
+            textureBottom -= (bottom - 332) / scale;
+            bottom = 332;
+        }
+        if (bottom <= top) return;
+        double u0 = textureNumber * entity.getWidth() / entity.getTextureWidth();
+        double u1 = (textureNumber + 1) * entity.getWidth() / entity.getTextureWidth();
+        double v0 = textureTop / entity.getTextureHeight(), v1 = textureBottom / entity.getTextureHeight();
+        double left = (centerX - halfWidth) / 640, right = (centerX + halfWidth) / 640;
+        glTexCoord2d(u0, v0);
+        glVertex2d(left, top / 400);
+        glTexCoord2d(u1, v0);
+        glVertex2d(right, top / 400);
+        glTexCoord2d(u1, v1);
+        glVertex2d(right, bottom / 400);
+        glTexCoord2d(u0, v1);
+        glVertex2d(left, bottom / 400);
     }
 
     private void drawEntity(Entity currentEntity, double viewport) {
