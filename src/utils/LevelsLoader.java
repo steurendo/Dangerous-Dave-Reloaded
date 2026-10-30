@@ -1,7 +1,6 @@
 package utils;
 
 import entities.Entity;
-import entities.EntityChain;
 import entities.MovingEntity;
 import game.Level;
 import game.LevelType;
@@ -209,11 +208,24 @@ public class LevelsLoader {
         return level;
     }
 
-    private void addEntity(EntityChain entities, Entity entity) {
-        if (entities.getNext() != null)
-            addEntity(entities.getNext(), entity);
-        else
-            entities.setNext(entity);
+    // Hitbox ridotta per entità fisse
+    private static void applyHazardHitbox(Entity entity) {
+        switch (entity.getCode()) {
+            case 22: // fuoco
+                entity.setHitboxInsets(5, 8);
+                break;
+            case 23: // acqua
+            case 24: // lava
+                entity.setHitboxInsets(2, 4);
+                break;
+            case 25: // tentacoli
+            case 26:
+                entity.setHitboxInsets(4, 0);
+                break;
+            case 27: // lame
+                entity.setHitboxInsets(3, 0);
+                break;
+        }
     }
 
 
@@ -250,7 +262,6 @@ public class LevelsLoader {
         LogicalLevel logicalLevel;
         int tileCode, levelWidth;
         Point spawnpoint;
-        EntityChain[] entities;
         ArrayList<MovingEntity> movingEntities;
         Entity[][] entitiesMap;
 
@@ -281,7 +292,6 @@ public class LevelsLoader {
         map = new boolean[levelWidth][TILES_ALONG_Y];
         climbables = new boolean[levelWidth][TILES_ALONG_Y];
         mapCodes = new int[levelWidth][TILES_ALONG_Y];
-        entities = new EntityChain[levelWidth];
         movingEntities = new ArrayList<>();
         entitiesMap = new Entity[levelWidth][TILES_ALONG_Y];
         for (int x = 0; x < levelWidth; x++) {
@@ -306,11 +316,9 @@ public class LevelsLoader {
                                 heights[tileCode],
                                 scoreValues[tileCode],
                                 mortals[tileCode]);
+                        if (mortals[tileCode])
+                            applyHazardHitbox(entity);
                         entitiesMap[x][y] = entity;
-                        if (entities[x] == null)
-                            entities[x] = new EntityChain(entity);
-                        else
-                            addEntity(entities[x], entity);
                     } else {
                         entity = new MovingEntity(textures.getTextureMovingEntities(), tileCodes[tileCode], figuresNumber[tileCode], new PointD(x * 32 + 16, y * 32 + 16), widths[tileCode], heights[tileCode], scoreValues[tileCode], mortals[tileCode]);
                         movingEntities.add((MovingEntity) entity);
@@ -324,7 +332,6 @@ public class LevelsLoader {
                 climbables,
                 levelWidth,
                 spawnpoint,
-                entities,
                 movingEntities,
                 entitiesMap,
                 mapCodes

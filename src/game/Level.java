@@ -1,7 +1,6 @@
 package game;
 
 import entities.Entity;
-import entities.EntityChain;
 import entities.MovingEntity;
 import utils.PointD;
 
@@ -16,7 +15,6 @@ public class Level {
     private final boolean[][] climbables;
     private final int width;
     private final Point spawnpoint;
-    private final EntityChain[] entities;
     private final ArrayList<MovingEntity> movingEntities;
     private final Entity[][] entitiesMap;
     private final int[][] tiles; // codice del tile di ogni cella (1-18 = blocco da disegnare)
@@ -31,7 +29,6 @@ public class Level {
             boolean[][] climbables,
             int width,
             Point spawnpoint,
-            EntityChain[] entities,
             ArrayList<MovingEntity> movingEntities,
             Entity[][] entitiesMap,
             int[][] tiles
@@ -40,7 +37,6 @@ public class Level {
         this.climbables = climbables;
         this.width = width;
         this.spawnpoint = spawnpoint;
-        this.entities = entities;
         this.movingEntities = movingEntities;
         this.entitiesMap = entitiesMap;
         this.tiles = tiles;
@@ -135,19 +131,13 @@ public class Level {
         this.levelType = levelType;
     }
 
-    public EntityChain[] getEntities() {
-        return entities;
-    }
-
     public ArrayList<MovingEntity> getMovingEntities() {
         return movingEntities;
     }
 
     public Entity getEntity(int x, int y) {
-        if (x < 0 || x == width) return null;
-        if (y < 0) y += TILES_ALONG_Y;
-        if (y == TILES_ALONG_Y) y = 0;
-        return entitiesMap[x][y];
+        if (x < 0 || x >= width) return null;
+        return entitiesMap[x][Math.floorMod(y, TILES_ALONG_Y)];
     }
 
     public void setWarpzone(Level warpzone) {
@@ -166,35 +156,13 @@ public class Level {
         warpzoneCompleted = true;
     }
 
-    public void clearEntity(int x, int y) {
-        entitiesMap[x][y] = null;
-    }
-
-    public void clearEntity(Entity entity) {
-        entitiesMap[(int) entity.getX() / 32][(int) entity.getY() / 32] = null;
-    }
-
     public void init(boolean resetWarpzoneState) {
-        int x, y;
-
-        for (x = 0; x < width; x++) {
-            for (y = 0; y < 10; y++)
-                entitiesMap[x][y] = null;
-            reInitEntities(entities[x], x);
-        }
+        for (Entity[] column : entitiesMap)
+            for (Entity entity : column)
+                if (entity != null)
+                    entity.setVisible(true);
         for (MovingEntity entity : movingEntities)
             entity.init();
         if (resetWarpzoneState) warpzoneCompleted = false;
-    }
-
-    public void reInitEntities(EntityChain entities, int x) {
-        if (entities != null) {
-            Entity entity;
-
-            entity = entities.getEntity();
-            entity.setVisible(true);
-            entitiesMap[x][(int) entity.getY() / 32] = entity;
-            reInitEntities(entities.getNext(), x);
-        }
     }
 }

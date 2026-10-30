@@ -397,8 +397,8 @@ public class Player {
         if (!alive)
             return false;
 
-        if (Math.abs(location.x - entity.getX()) < WIDTH / 2 + entity.getWidth() / 2 &&
-                Math.abs(location.y - entity.getY()) < HEIGHT / 2 + entity.getHeight() / 2) //COLLIDE CON UN'ENTITA'
+        if (location.x - WIDTH / 2 < entity.getHitboxRight() && location.x + WIDTH / 2 > entity.getHitboxLeft() &&
+                location.y - HEIGHT / 2 < entity.getHitboxBottom() && location.y + HEIGHT / 2 > entity.getHitboxTop()) //COLLIDE CON UN'ENTITA'
         {
             if (entity.isMortal()) {
                 score += entity.getScoreValue(); //IL PLAYER MUORE

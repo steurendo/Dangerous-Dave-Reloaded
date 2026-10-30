@@ -259,42 +259,40 @@ public class ScenarioLevel extends Scenario {
     }
 
     private void collisionsWithEntities() {
-        Level currentLevel = model.getCurrentLevel();
+        Level level = model.getCurrentLevel();
+        int x0 = (int) Math.floor((player.getX() - Player.WIDTH / 2) / 32);
+        int x1 = (int) Math.floor((player.getX() + Player.WIDTH / 2) / 32);
+        int y0 = (int) Math.floor((player.getY() - Player.HEIGHT / 2) / 32);
+        int y1 = (int) Math.floor((player.getY() + Player.HEIGHT / 2) / 32);
 
-        Entity entity;
-        // Collisione con entità (x, y + 1)
-        entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 + 1);
-        if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // Collisione con entità (x + 1, y)
-        entity = currentLevel.getEntity((int) player.getX() / 32 + 1, (int) player.getY() / 32);
-        if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // Collisione con entità (x, y - 1)
-        entity = currentLevel.getEntity((int) player.getX() / 32, (int) player.getY() / 32 - 1);
-        if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
-        // Collisione con entità (x - 1, y)
-        entity = currentLevel.getEntity((int) player.getX() / 32 - 1, (int) player.getY() / 32);
-        if (player.checkCollisionWithEntity(entity) && !entity.isMortal()) currentLevel.clearEntity(entity);
+        for (int x = x0; x <= x1; x++)
+            for (int y = y0; y <= y1; y++)
+                player.checkCollisionWithEntity(level.getEntity(x, y));
     }
 
     private void collisionsWithMovingEntities() {
-        for (MovingEntity entity : model.getCurrentLevel().getMovingEntities()) {
-            if (entity.isVisible()) {
-                if (entity.getShoot().isVisible())
-                    if (model.getCurrentLevel().checkPureCollision(entity.getShoot().getX() + entity.getShoot().getDirection() * 20, entity.getShoot().getY()))
-                        entity.getShoot().setDirection(0);
-                if (entity.getShoot().isVisible())
-                    if (player.checkCollisionWithShoot(entity.getShoot()) && player.isAlive()) {
-                        player.die();
-                        entity.getShoot().setDirection(0);
-                    }
-                if (player.getShoot().isVisible())
-                    if (entity.checkCollisionWithShoot(player.getShoot()) && entity.isAlive()) {
-                        entity.die();
-                        player.getShoot().setDirection(0);
-                    }
-                if (entity.isAlive())
-                    if (player.checkCollisionWithEntity(entity))
-                        entity.die();
+        for (MovingEntity entity : model.getCurrentLevel().getMovingEntities())
+            if (entity.isVisible() && entity.isAlive() && player.checkCollisionWithEntity(entity))
+                entity.die();
+    }
+
+    private void collisionsWithShoots() {
+        Level level = model.getCurrentLevel();
+        Shoot playerShoot = player.getShoot();
+
+        for (MovingEntity entity : level.getMovingEntities()) {
+            if (!entity.isVisible()) continue;
+            Shoot enemyShoot = entity.getShoot();
+            if (enemyShoot.isVisible() &&
+                    level.checkPureCollision(enemyShoot.getX() + enemyShoot.getDirection() * 20, enemyShoot.getY()))
+                enemyShoot.setDirection(0);
+            if (enemyShoot.isVisible() && player.isAlive() && player.checkCollisionWithShoot(enemyShoot)) {
+                player.die();
+                enemyShoot.setDirection(0);
+            }
+            if (playerShoot.isVisible() && entity.isAlive() && entity.checkCollisionWithShoot(playerShoot)) {
+                entity.die();
+                playerShoot.setDirection(0);
             }
         }
     }
@@ -341,6 +339,8 @@ public class ScenarioLevel extends Scenario {
             }
             if (player.getSpeedY() < Player.JUMP_POWER)
                 player.setSpeedY(Player.JUMP_POWER);
+
+            collisionsWithShoots();
 
             // Player has passed level
             if (player.hasPassedLevel()) model.nextLevel();
@@ -422,7 +422,8 @@ public class ScenarioLevel extends Scenario {
         Textures.bindTexture(textures.getTextureEntities());
         glBegin(GL_QUADS);
         for (int i = startX; i < endX; i++)
-            drawEntities(level.getEntities()[i], viewport);
+            for (int j = 0; j < Level.TILES_ALONG_Y; j++)
+                drawEntity(level.getEntity(i, j), viewport);
         glEnd();
 
         // Schermata di fine gioco
@@ -801,14 +802,12 @@ public class ScenarioLevel extends Scenario {
         }
     }
 
-    private void drawEntities(EntityChain entities, double viewport) {
-        if (entities != null) {
-            Entity currentEntity;
+    private void drawEntity(Entity currentEntity, double viewport) {
+        if (currentEntity != null) {
             int textureNumber;
             double limitYTexture, limitY;
             int figureNumber = (int) this.figureNumber;
 
-            currentEntity = entities.getEntity();
             if (currentEntity.isVisible()) {
                 textureNumber = (figureNumber / FIGURE_SPEED + (int) currentEntity.getX() / 32 + (int) currentEntity.getY() / 32) % currentEntity.getFiguresNumber();
                 limitY = currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32 > 332 ? 332d / 400 : (currentEntity.getY() - OFFSET_Y * 32 + currentEntity.getHeight() / 2 + 32) / 400;
@@ -822,7 +821,6 @@ public class ScenarioLevel extends Scenario {
                 glTexCoord2d((textureNumber * currentEntity.getWidth()) / currentEntity.getTextureWidth(), limitYTexture);
                 glVertex2d((currentEntity.getX() - currentEntity.getWidth() / 2 - viewport) / 640, limitY);
             }
-            drawEntities(entities.getNext(), viewport);
         }
     }
 
