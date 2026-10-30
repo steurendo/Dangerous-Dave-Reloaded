@@ -109,13 +109,10 @@ public class ScenarioLevel extends Scenario {
                     Keyboard.isKeyDown(GLFW_KEY_LEFT) ||
                     Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
                 Level currentLevel = model.getCurrentLevel();
-                boolean wouldClimb = false;
-                for (PointD corner : player.getCorners()) {
-                    if (currentLevel.checkIfClimbable(corner)) {
-                        wouldClimb = true;
-                        break;
-                    }
-                }
+                boolean wouldClimb = currentLevel.checkIfClimbable(player.getLeft(), player.getTop()) ||
+                        currentLevel.checkIfClimbable(player.getRight(), player.getTop()) ||
+                        currentLevel.checkIfClimbable(player.getLeft(), player.getBottom()) ||
+                        currentLevel.checkIfClimbable(player.getRight(), player.getBottom());
                 boolean canClimb = !player.isOnJetpack() && !player.isFalling();
                 player.setIfIsClimbing(canClimb && wouldClimb);
             }
@@ -216,15 +213,12 @@ public class ScenarioLevel extends Scenario {
 
     private void transitionCheck() {
         Level level = model.getCurrentLevel();
-        PointD speed = player.getSpeed();
-        PointD[] corners = player.getCorners();
+        double dx = player.getSpeedX(), dy = player.getSpeedY() * Timing.scale();
 
-        for (PointD corner : corners) {
-            if (level.isTouchingWorldBorders(corner.x + speed.x, corner.y + speed.y * Timing.scale())) {
-                model.nextLevel(this::setSoftPaused);
-                return;
-            }
-        }
+        // Basta controllare due angoli opposti
+        if (level.isTouchingWorldBorders(player.getLeft() + dx, player.getTop() + dy) ||
+                level.isTouchingWorldBorders(player.getRight() + dx, player.getBottom() + dy))
+            model.nextLevel(this::setSoftPaused);
     }
 
     private void collisionsWithWorld() {

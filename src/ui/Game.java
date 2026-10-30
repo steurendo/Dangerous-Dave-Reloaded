@@ -127,6 +127,7 @@ public class Game {
             scenario.commands();
             scenario.collisions();
             scenario.update();
+            Keyboard.endFrame();
 
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT);

@@ -70,15 +70,6 @@ public class Player {
         return location.y + HEIGHT / 2;
     }
 
-    public PointD[] getCorners() {
-        return new PointD[]{
-                new PointD(location.x - WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-LEFT
-                new PointD(location.x + WIDTH / 2, location.y - BOX_HEIGHT / 2), // TOP-RIGHT
-                new PointD(location.x - WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-LEFT
-                new PointD(location.x + WIDTH / 2, location.y + HEIGHT / 2), // BOTTOM-RIGHT
-        };
-    }
-
     public double getX() {
         return location.x;
     }
@@ -93,15 +84,6 @@ public class Player {
 
     public int getScore() {
         return score;
-    }
-
-    public void setSpeed(PointD speed) {
-        speedX = speed.x;
-        speedY = speed.y;
-    }
-
-    public PointD getSpeed() {
-        return new PointD(speedX, speedY);
     }
 
     public double getSpeedX() {

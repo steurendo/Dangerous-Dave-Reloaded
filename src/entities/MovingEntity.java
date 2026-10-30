@@ -95,34 +95,35 @@ public class MovingEntity extends Entity {
                 shootReload = SHOOT_RELOAD;
             }
 
-            PointD delta = new PointD();
+            double dx = 0, dy = 0;
             if (code == 0) {
-                delta.x += Math.cos(movingNumber * 1.8) * 4;
-                delta.y += Math.sin(movingNumber * 10) * 2;
+                dx += Math.cos(movingNumber * 1.8) * 4;
+                dy += Math.sin(movingNumber * 10) * 2;
             } else if (code == 1) {
-                delta.x -= Math.sin(movingNumber * 2) * 2.6;
-                delta.y += Math.cos(movingNumber * 2) * 0.8;
+                dx -= Math.sin(movingNumber * 2) * 2.6;
+                dy += Math.cos(movingNumber * 2) * 0.8;
             } else if (code == 2) {
-                delta.x -= Math.cos(movingNumber * 4) * 2;
-                delta.y += Math.sin(movingNumber * 4) * 2;
-                delta.x -= Math.cos(movingNumber * 15) * 1;
-                delta.y += Math.sin(movingNumber * 15) * 1;
+                dx -= Math.cos(movingNumber * 4) * 2;
+                dy += Math.sin(movingNumber * 4) * 2;
+                dx -= Math.cos(movingNumber * 15) * 1;
+                dy += Math.sin(movingNumber * 15) * 1;
             } else if (code == 3)
-                delta.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
+                dx += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
             else if (code == 4) {
-                delta.x += Math.cos(movingNumber * 4) * 1.4;
-                delta.y += Math.sin(movingNumber * 4) * 3.4;
+                dx += Math.cos(movingNumber * 4) * 1.4;
+                dy += Math.sin(movingNumber * 4) * 3.4;
             } else if (code == 5) {
-                delta.x -= Math.cos(movingNumber * 4) * 2;
-                delta.y += Math.sin(movingNumber * 4) * 2;
-                delta.x -= Math.cos(movingNumber * 15) * 1;
-                delta.y -= Math.sin(movingNumber * 15) * 1;
+                dx -= Math.cos(movingNumber * 4) * 2;
+                dy += Math.sin(movingNumber * 4) * 2;
+                dx -= Math.cos(movingNumber * 15) * 1;
+                dy -= Math.sin(movingNumber * 15) * 1;
             } else if (code == 6) {
-                delta.x += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
-                delta.y += Math.sin(movingNumber * 60) * 2;
+                dx += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
+                dy += Math.sin(movingNumber * 60) * 2;
             } else if (code == 7)
-                delta.x += Math.cos(movingNumber * 4) * 4;
-            location = location.plus(delta.scale(Timing.scale()));
+                dx += Math.cos(movingNumber * 4) * 4;
+            location.x += dx * Timing.scale();
+            location.y += dy * Timing.scale();
             movingNumber = (movingNumber + 0.01 * Timing.scale()) % 360;
         }
     }

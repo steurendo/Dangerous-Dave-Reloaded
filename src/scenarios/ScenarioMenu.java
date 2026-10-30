@@ -32,6 +32,7 @@ public class ScenarioMenu extends Scenario {
 
     @Override
     public void update() {
+        model.update();
         figureNumber += Timing.scale();
         if (figureNumber >= 16) {
             figureNumber -= 16;

@@ -5,12 +5,11 @@ import utils.Callback;
 import utils.LevelsLoader;
 import utils.PointD;
 import utils.Textures;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import utils.Timing;
 
 public class Model {
-    private boolean canStart;
+    private static final double START_DELAY = 0.5;
+    private double startDelay;
     private final Level levelsRoot;
     private Level currentLevel;
     private final Player player;
@@ -29,14 +28,17 @@ public class Model {
         player = new Player();
         player.setLocation(new PointD(currentLevel.getSpawnpoint().x * 32 + 16, currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2)));
         gameFinished = false;
-        canStart = false;
         newHighScore = false;
         waitCommand = false;
         prepareForStart();
     }
 
     public boolean canStart() {
-        return canStart;
+        return startDelay <= 0;
+    }
+
+    public void update() {
+        if (startDelay > 0) startDelay -= Timing.scale() / 60;
     }
 
     public void setGameFinished(boolean gameFinished) {
@@ -64,12 +66,7 @@ public class Model {
     }
 
     private void prepareForStart() {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                canStart = true;
-            }
-        }, 500);
+        startDelay = START_DELAY;
     }
 
     public void reset() {
@@ -83,7 +80,6 @@ public class Model {
                 currentLevel.getSpawnpoint().y * 32 + (32 - Player.HEIGHT / 2));
         player.setLocation(spawnpoint);
         gameFinished = false;
-        canStart = false;
         newHighScore = false;
         waitCommand = false;
         prepareForStart();
