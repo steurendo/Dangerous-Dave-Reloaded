@@ -2,21 +2,17 @@ package ui;
 
 import game.Model;
 import game.ModelScore;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import scenarios.Scenario;
 import scenarios.ScenarioLevel;
 import scenarios.ScenarioMenu;
-import utils.ErrorDialog;
-import utils.ResourceLoader;
-import utils.Screen;
-import utils.Textures;
-import utils.Timing;
+import utils.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -140,7 +136,8 @@ public class Game {
             if (glfwGetTime() - now < 0.001) {
                 try {
                     Thread.sleep(1);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
 
             if (glfwWindowShouldClose(window))
