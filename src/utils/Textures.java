@@ -17,6 +17,7 @@ public class Textures {
     private int textureGameParts;
     private int textureLevelsLeft;
     private int textureScoreParts;
+    private int textureTilemap;
 
     public Textures() {
         try {
@@ -26,6 +27,7 @@ public class Textures {
             textureGameParts = loadTexture(ImageIO.read(ResourceLoader.load(this, "game_parts.png")));
             textureLevelsLeft = loadTexture(ImageIO.read(ResourceLoader.load(this, "levels_left.png")));
             textureScoreParts = loadTexture(ImageIO.read(ResourceLoader.load(this, "score_parts.png")));
+            textureTilemap = loadTexture(ImageIO.read(ResourceLoader.load(this, "tilemap.png")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,6 +55,10 @@ public class Textures {
 
     public int getTextureScoreParts() {
         return textureScoreParts;
+    }
+
+    public int getTextureTilemap() {
+        return textureTilemap;
     }
 
     public static void bindTexture(int texture) {

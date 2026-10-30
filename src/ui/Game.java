@@ -14,6 +14,7 @@ import scenarios.ScenarioLevel;
 import scenarios.ScenarioMenu;
 import utils.ErrorDialog;
 import utils.ResourceLoader;
+import utils.Screen;
 import utils.Textures;
 import utils.Timing;
 
@@ -66,6 +67,7 @@ public class Game {
                 windowW = width;
                 windowH = height;
                 glViewport(0, 0, width, height);
+                Screen.setFramebufferWidth(width);
             });
             //CENTRA LA FINESTRA
             try (MemoryStack stack = stackPush()) {
@@ -88,6 +90,11 @@ public class Game {
             //FREQUENZA DELLO SCHERMO
             refreshRate = detectRefreshRate();
             glfwSetWindowPosCallback(window, (w, x, y) -> refreshRate = detectRefreshRate());
+            try (MemoryStack stack = stackPush()) {
+                IntBuffer fbWidth = stack.mallocInt(1), fbHeight = stack.mallocInt(1);
+                glfwGetFramebufferSize(window, fbWidth, fbHeight);
+                Screen.setFramebufferWidth(fbWidth.get(0));
+            }
             //PERMETTE DI FAR INTERAGIRE OPENGL E GLFW
             GL.createCapabilities();
             //IMPOSTAZIONI

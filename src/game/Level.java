@@ -19,7 +19,7 @@ public class Level {
     private final EntityChain[] entities;
     private final ArrayList<MovingEntity> movingEntities;
     private final Entity[][] entitiesMap;
-    private final int texture;
+    private final int[][] tiles; // codice del tile di ogni cella (1-18 = blocco da disegnare)
     private int number;
     private Level next;
     private Level warpzone;
@@ -34,7 +34,7 @@ public class Level {
             EntityChain[] entities,
             ArrayList<MovingEntity> movingEntities,
             Entity[][] entitiesMap,
-            int texture
+            int[][] tiles
     ) {
         this.map = map;
         this.climbables = climbables;
@@ -43,7 +43,7 @@ public class Level {
         this.entities = entities;
         this.movingEntities = movingEntities;
         this.entitiesMap = entitiesMap;
-        this.texture = texture;
+        this.tiles = tiles;
         number = -1;
         next = null;
         warpzone = null;
@@ -103,8 +103,8 @@ public class Level {
         return spawnpoint;
     }
 
-    public int getTexture() {
-        return texture;
+    public int getTile(int x, int y) {
+        return tiles[x][y];
     }
 
     public int getNumber() {

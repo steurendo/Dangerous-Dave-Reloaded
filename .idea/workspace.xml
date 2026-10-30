@@ -9,15 +9,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Updated README.md and assets.">
+    <list default="true" id="0604ea98-5645-4775-aaf2-80e16e1c7797" name="Changes" comment="Improved tick mechanic.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/MovingEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entities/Shoot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/Shoot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/Scenario.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/Scenario.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game/Level.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/Level.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioLevel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenarios/ScenarioMenu.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ui/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/LevelsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/LevelsLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/Textures.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/Textures.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -354,7 +352,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770239110261</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Improved tick mechanic.">
+      <option name="closed" value="true" />
+      <created>1793356924962</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1793356924962</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -396,7 +402,8 @@
     <MESSAGE value="Improved movements" />
     <MESSAGE value="Added &quot;warpzone&quot; text on levels transition to warpzones" />
     <MESSAGE value="Updated README.md and assets." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated README.md and assets." />
+    <MESSAGE value="Improved tick mechanic." />
+    <option name="LAST_COMMIT_MESSAGE" value="Improved tick mechanic." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -408,7 +415,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/scenarios/ScenarioLevel.java</url>
-          <line>92</line>
+          <line>93</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
