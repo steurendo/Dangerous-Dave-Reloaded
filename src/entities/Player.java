@@ -434,6 +434,7 @@ public class Player {
 
         shootLocation = shoot.getLocation();
         return (Math.abs(location.x - shootLocation.x) < WIDTH / 2 + 20 &&
-                Math.abs(location.y - shootLocation.y) < WIDTH / 2 + 3);
+                shootLocation.y > location.y - BOX_HEIGHT / 2 - 3 &&
+                shootLocation.y < location.y + HEIGHT / 2 + 3);
     }
 }
