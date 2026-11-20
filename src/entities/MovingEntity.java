@@ -118,10 +118,10 @@ public class MovingEntity extends Entity {
                 dx -= Math.cos(movingNumber * 15) * 1;
                 dy -= Math.sin(movingNumber * 15) * 1;
             } else if (code == 6) {
-                dx += Math.cos(movingNumber * 4) > 0 ? 4 : -4;
+                dx += Math.cos(movingNumber * 8) > 0 ? 3 : -3;
                 dy += Math.sin(movingNumber * 60) * 2;
             } else if (code == 7)
-                dx += Math.cos(movingNumber * 4) * 4;
+                dx += Math.cos(movingNumber * 8) * 10;
             location.x += dx * Timing.scale();
             location.y += dy * Timing.scale();
             movingNumber = (movingNumber + 0.01 * Timing.scale()) % 360;
