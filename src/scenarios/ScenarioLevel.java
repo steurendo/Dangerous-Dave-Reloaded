@@ -627,30 +627,49 @@ public class ScenarioLevel extends Scenario {
 
             // Giocatore
             if (!model.isGameFinished() && (!softPaused || showPlayer)) {
+                double top = playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32;
+                double bottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32;
                 if (player.isAlive()) {
-                    double cutBottom = playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - 332;
-                    double cutTop = 30 - (playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 + 32);
-                    if (cutBottom < 0) cutBottom = 0;
-                    if (cutTop < 0) cutTop = 0;
-                    if (cutBottom < 32 && cutTop < 32) {
-                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), cutTop / 304);
-                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), cutTop / 304);
-                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32 + cutTop) / 400));
-                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), ((32 - cutBottom) / 304));
-                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
-                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), ((32 - cutBottom) / 304));
-                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32 - cutBottom) / 400));
+                    double textureTop = 0, textureBottom = 32;
+                    if (top < 29) {
+                        textureTop += 29 - top;
+                        top = 29;
+                    }
+                    if (bottom > 332) {
+                        textureBottom -= bottom - 332;
+                        bottom = 332;
+                    }
+                    if (textureBottom > textureTop) {
+                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), (textureTop / 304));
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), (top / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), (textureTop / 304));
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), (top / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber() + 40) / 720), (textureBottom / 304));
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), (bottom / 400));
+                        glTexCoord2d(((40d * player.getFigureNumber()) / 720), (textureBottom / 304));
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), (bottom / 400));
                     }
                 } else {
-                    glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (32d / 304));
-                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-                    glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (32d / 304));
-                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 - Player.HEIGHT / 2 - 1 + 32) / 400));
-                    glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (58d / 304));
-                    glVertex2d(((playerLocation.x + 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
-                    glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (58d / 304));
-                    glVertex2d(((playerLocation.x - 20 - viewport) / 640), ((playerLocation.y - OFFSET_Y * 32 + Player.HEIGHT / 2 + 32) / 400));
+                    double textureTop = 32, textureBottom = 58;
+                    double texelsPerPixel = (textureBottom - textureTop) / (bottom - top);
+                    if (top < 29) {
+                        textureTop += (29 - top) * texelsPerPixel;
+                        top = 29;
+                    }
+                    if (bottom > 332) {
+                        textureBottom -= (bottom - 332) * texelsPerPixel;
+                        bottom = 332;
+                    }
+                    if (bottom > top) {
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (textureTop / 304));
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), (top / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (textureTop / 304));
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), (top / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4) + 40) / 720), (textureBottom / 304));
+                        glVertex2d(((playerLocation.x + 20 - viewport) / 640), (bottom / 400));
+                        glTexCoord2d(((40d * (figureNumber / 5 % 4)) / 720), (textureBottom / 304));
+                        glVertex2d(((playerLocation.x - 20 - viewport) / 640), (bottom / 400));
+                    }
                 }
             }
 
